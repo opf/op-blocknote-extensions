@@ -1,49 +1,12 @@
 import { insertOrUpdateBlock } from "@blocknote/core";
 import { createReactBlockSpec } from "@blocknote/react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import type { WorkPackage, WorkPackageCollection } from "./openProjectTypes";
+import { fetchWorkPackage } from "./services/openProjectApi";
 
 export const UI_BLUE = "#000091"; // Default color for task status icons
 export const UI_BEIGE = "#FBF5F2";
 export const UI_GRAY = "#3a3a3a";
-
-export const OPENPROJECT_HOST = "https://openproject.local";
-
-export interface WorkPackage {
-  id: string;
-  subject: string;
-  status?: string | null;
-  assignee?: string | null;
-  href?: string | null;
-  lockVersion?: number | null;
-  _links?: {
-    self: { href: string };
-    status: { title: string; href: string } | null;
-    assignee: { title: string; href: string } | null;
-    type: { title: string; href: string } | null;
-  } | null;
-  _embedded?: {
-    status?: Status | null;
-    type?: {
-      color: string;
-    } | null;
-  } | null;
-}
-
-export interface WorkPackageCollection {
-  _embedded: {
-    elements: WorkPackage[];
-  };
-}
-
-export interface Status {
-  id: string;
-  name: string;
-  isClosed: boolean;
-  color: string;
-  _links: {
-    self: { href: string };
-  };
-}
 
 interface OpenProjectResponse {
   _embedded?: {
@@ -72,9 +35,9 @@ const OpenProjectWorkPackageBlockComponent = ({
   editor,
 }: {
   block: BlockProps;
-  editor: any; // Using any here to avoid type conflicts with BlockNoteEditor
+  editor: unknown;
 }) => {
-  const [mode, _setMode] = useState<"search" | "create">("search");
+  const [mode] = useState<"search" | "create">("search");
 
   // Search mode state
   const [searchQuery, setSearchQuery] = useState("");
@@ -110,15 +73,8 @@ const OpenProjectWorkPackageBlockComponent = ({
   // Load saved work package if it exists
   React.useEffect(() => {
     if (block.props.wpid) {
-      void fetch(`api/v3/work_packages/${block.props.wpid}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      })
-        .then(async (response) => {
-          if (!response.ok) {
-            return;
-          }
-          const data = await response.json();
+      fetchWorkPackage(block.props.wpid)
+        .then((data) => {
           setSelectedWorkPackage(data as WorkPackage);
         })
         .catch((error) => {
