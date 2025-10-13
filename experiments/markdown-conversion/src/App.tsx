@@ -38,6 +38,10 @@ export default function App() {
     setMarkdown(markdown);
   };
 
+  const handleMarkdownChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setMarkdown(e.target.value);
+  };
+
   const convertMarkdownToBlocks = async () => {
     // Convert markdown to BlockNote blocks
     const blocks = await editor.tryParseMarkdownToBlocks(markdown);
@@ -63,7 +67,10 @@ export default function App() {
       <div className="view-wrapper">
         <div className="view-label">Markdown</div>
         <div className="view">
-          <textarea defaultValue={markdown}/>
+          <textarea 
+            value={markdown}
+            onChange={handleMarkdownChange}
+          />
           <button
             onClick={convertMarkdownToBlocks}
             style={{
