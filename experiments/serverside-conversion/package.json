@@ -1,0 +1,39 @@
+{
+  "name": "@blocknote/example-collaboration-partykit",
+  "description": "AUTO-GENERATED FILE, DO NOT EDIT DIRECTLY",
+  "type": "module",
+  "private": true,
+  "version": "0.12.4",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "dev:server": "node server.js",
+    "dev:both": "concurrently \"npm run dev\" \"npm run dev:server\"",
+    "build:prod": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@blocknote/core": "latest",
+    "@blocknote/react": "latest",
+    "@blocknote/ariakit": "latest",
+    "@blocknote/mantine": "latest",
+    "@blocknote/shadcn": "latest",
+    "@blocknote/server-util": "latest",
+    "@mantine/core": "^8.3.2",
+    "@mantine/hooks": "^8.3.2",
+    "@mantine/utils": "^6.0.22",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "y-indexeddb": "^9.0.12",
+    "yjs": "^13.6.27",
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.3.4",
+    "concurrently": "^8.2.2"
+  }
+}
