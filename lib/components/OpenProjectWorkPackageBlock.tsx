@@ -6,6 +6,7 @@ import { useWorkPackage } from "../hooks/useWorkPackage";
 import { useWorkPackageSearch } from "../hooks/useWorkPackageSearch";
 import type { WorkPackage } from "../openProjectTypes";
 import { linkToWorkPackage } from "../services/openProjectApi";
+import { LinkIcon } from "@primer/octicons-react";
 
 import styled from "styled-components";
 
@@ -325,7 +326,7 @@ export const openProjectWorkPackageStaticBlockSpec = createBlockSpec(
 );
 
 export const openProjectWorkPackageSlashMenu = (editor: any) => ({
-  title: "Open Project Work Package",
+  title: "Link to existing work package",
   onItemClick: () => insertOrUpdateBlock(editor, { type: "openProjectWorkPackage" }),
   aliases: ["openproject", "op", "workpackage", "work package", "wp", "link",
     "openproject work package link", "openproject workpackage link", "openproject wp link",
@@ -345,6 +346,6 @@ export const openProjectWorkPackageSlashMenu = (editor: any) => ({
     "link op work package", "link op workpackage", "link op wp",
   ],
   group: "OpenProject",
-  icon: <span>📦</span>,
-  subtext: "Search and link an existing Work Package",
+  icon: <LinkIcon size={18} />,
+  subtext: "Add a dynamic link to a single work package",
 })
