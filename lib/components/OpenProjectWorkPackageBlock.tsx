@@ -35,7 +35,7 @@ const SearchIconWrapper = styled.div`
 `;
 const SearchInput = styled.input`
   width: 100%;
-  margin: 10px 0;
+  margin-top: 10px;
   padding: 8px 12px;
   padding-left: 30px;
   border-radius: 4px;
@@ -44,12 +44,7 @@ const SearchInput = styled.input`
 `;
 
 const Dropdown = styled.div`
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  z-index: 10;
-  background-color: white;
+  background-color: var(--bn-colors-menu-background);
   border: 1px solid #ccc;
   border-radius: 0 0 4px 4px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -61,8 +56,8 @@ const Dropdown = styled.div`
 const DropdownOption = styled.div<{ selected: boolean }>`
   padding: 8px 12px;
   cursor: pointer;
-  background-color: ${({ selected }) => selected ? '#f0f0f0' : 'transparent'};
-  border-bottom: 1px solid #eee;
+  background-color: ${({ selected }) => selected ? 'var(--bn-colors-highlights-gray-background)' : 'var(--bn-colors-menu-background)'};
+  border: none;
 `;
 
 const Type = styled.div`
