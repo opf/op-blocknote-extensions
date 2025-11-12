@@ -16,12 +16,15 @@ const Block = styled.div`
   padding: 12px 10px;
   border: none;
   border-radius: 5px;
-  background-color: #FBF5F2;
+  background-color: var(--bn-colors-menu-background);
   width: 450px;
 `;
 
 const SearchContainer = styled.div`
   position: relative;
+  padding: 8px 16px;
+  box-shadow: var(--bn-shadow-medium);
+  border-radius: var(--bn-border-radius-large);
 `;
 
 const SearchInput = styled.input`
@@ -200,24 +203,27 @@ const OpenProjectWorkPackageBlockComponent = ({
       <div>
         {!block.props.wpid && (
           <SearchContainer>
-            <SearchInput
-              ref={inputRef}
-              type="text"
-              placeholder={"Search for work package ID or subject"}
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                if (e.target.value) {
-                  setIsDropdownOpen(true);
-                }
-              }}
-              onFocus={() => {
-                if (searchResults.length > 0) {
-                  setIsDropdownOpen(true);
-                }
-              }}
-              onKeyDown={handleKeyDown}
-            />
+            <label>
+              Link existing work package
+              <SearchInput
+                ref={inputRef}
+                type="search"
+                placeholder={"Search for work package ID or subject"}
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  if (e.target.value) {
+                    setIsDropdownOpen(true);
+                  }
+                }}
+                onFocus={() => {
+                  if (searchResults.length > 0) {
+                    setIsDropdownOpen(true);
+                  }
+                }}
+                onKeyDown={handleKeyDown}
+              />
+            </label>
 
             {/* Autocomplete dropdown */}
             {isDropdownOpen && searchResults.length > 0 && (
