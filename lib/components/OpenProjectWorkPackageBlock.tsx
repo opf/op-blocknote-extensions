@@ -6,7 +6,7 @@ import { useWorkPackage } from "../hooks/useWorkPackage";
 import { useWorkPackageSearch } from "../hooks/useWorkPackageSearch";
 import type { WorkPackage } from "../openProjectTypes";
 import { linkToWorkPackage } from "../services/openProjectApi";
-import { LinkIcon } from "@primer/octicons-react";
+import { LinkIcon, SearchIcon } from "@primer/octicons-react";
 
 import styled from "styled-components";
 
@@ -27,9 +27,17 @@ const SearchContainer = styled.div`
   border-radius: var(--bn-border-radius-large);
 `;
 
+const SearchIconWrapper = styled.div`
+  position: absolute;
+  margin-top: 10px;
+  padding-top: 4px;
+  padding-left: 6px;
+`;
 const SearchInput = styled.input`
   width: 100%;
+  margin: 10px 0;
   padding: 8px 12px;
+  padding-left: 30px;
   border-radius: 4px;
   border: 1px solid #ccc;
   font-size: 14px;
@@ -205,6 +213,9 @@ const OpenProjectWorkPackageBlockComponent = ({
           <SearchContainer>
             <label>
               Link existing work package
+              <SearchIconWrapper>
+                <SearchIcon size={18} />
+              </SearchIconWrapper>
               <SearchInput
                 ref={inputRef}
                 type="search"
