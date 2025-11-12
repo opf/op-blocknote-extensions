@@ -60,21 +60,18 @@ const DropdownOption = styled.div<{ selected: boolean }>`
   border: none;
 `;
 
-const Type = styled.div`
+const WorkPackageType = styled.span<{ color?: string }>`
   gap: 8px;
   font-weight: bold;
   text-transform: uppercase;
-`;
-
-const TypeColor = styled(Type) <{ color?: string }>`
   color: ${({ color }) => color || UI_BLUE};
 `;
 
-const Id = styled.div`
+const WorkPackageId = styled.span`
   color: #666;
 `;
 
-const Status = styled.div<{ bgcolor?: string }>`
+const WorkPackageStatus = styled.span<{ bgcolor?: string }>`
   font-size: 0.8rem;
   border-radius: 12px;
   padding: 2px 8px;
@@ -82,7 +79,7 @@ const Status = styled.div<{ bgcolor?: string }>`
   background-color: ${({ bgcolor }) => bgcolor || UI_BLUE};
 `;
 
-const Link = styled.a`
+const WorkPackageTitle = styled.div`
   margin-right: 6px;
   text-decoration: none;
   color: #000091;
@@ -254,12 +251,10 @@ const OpenProjectWorkPackageBlockComponent = ({
                     }}
                     onMouseEnter={() => setFocusedResultIndex(index)}
                   >
-                    <div style={{ fontWeight: "bold" }}>
-                      #{wp.id} - {wp.subject}
-                    </div>
-                    <div style={{ fontSize: "12px", color: "#666" }}>
-                      {wp._links?.type?.title} {wp._links?.status?.title}
-                    </div>
+                    <WorkPackageType color={wp._embedded?.type?.color}>{wp._links?.type?.title}</WorkPackageType>
+                    <WorkPackageId>{wp.id}</WorkPackageId>
+                    <WorkPackageStatus bgcolor={wp._embedded?.status?.color}>{wp.status}</WorkPackageStatus>
+                    <WorkPackageTitle>{wp.subject}</WorkPackageTitle>
                   </DropdownOption>
                 ))}
               </Dropdown>
@@ -275,21 +270,21 @@ const OpenProjectWorkPackageBlockComponent = ({
         {selectedWorkPackage && (
           <div>
             <div style={{ display: "flex", gap: "8px" }}>
-              <TypeColor color={selectedWorkPackage._embedded?.type?.color}>
+              <WorkPackageType color={selectedWorkPackage._embedded?.type?.color}>
                 {selectedWorkPackage._links?.type?.title}
-              </TypeColor>
-              <Id>#{selectedWorkPackage.id}</Id>
-              <Status bgcolor={selectedWorkPackage._embedded?.status?.color}>
+              </WorkPackageType>
+              <WorkPackageId>#{selectedWorkPackage.id}</WorkPackageId>
+              <WorkPackageStatus bgcolor={selectedWorkPackage._embedded?.status?.color}>
                 {selectedWorkPackage._links?.status?.title}
-              </Status>
+              </WorkPackageStatus>
             </div>
 
             <div>
-              <Link
+              <WorkPackageLink
                 href={linkToWorkPackage(block.props.wpid)}
               >
                 {selectedWorkPackage.subject}
-              </Link>
+              </WorkPackageLink>
             </div>
           </div>
         )}
