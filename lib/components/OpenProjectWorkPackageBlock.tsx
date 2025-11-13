@@ -33,13 +33,13 @@ const SearchLabel = styled.label`
 
 const SearchIconWrapper = styled.div`
   position: absolute;
-  margin-top: 10px;
+  margin-top: 8px;
   padding-top: 4px;
-  padding-left: 6px;
+  padding-left: 8px;
 `;
 const SearchInput = styled.input`
   width: 100%;
-  margin-top: 10px;
+  margin-top: 8px;
   padding: 8px 12px;
   padding-left: 30px;
   border-radius: 4px;
@@ -51,6 +51,7 @@ const Dropdown = styled.div`
   background-color: var(--bn-colors-menu-background);
   overflow-y: auto;
   padding-top: 8px;
+  margin: 0 -8px;
 `;
 
 const DropdownOption = styled.div<{ selected: boolean }>`
@@ -59,6 +60,7 @@ const DropdownOption = styled.div<{ selected: boolean }>`
   border: none;
   border-radius: 4px;
   margin: 4px 0;
+  padding: 0 8px;
 `;
 
 const WorkPackage = styled.div`
