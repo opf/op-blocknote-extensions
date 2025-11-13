@@ -92,8 +92,18 @@ const WorkPackageStatus = styled.div<{ bgcolor?: string }>`
 const WorkPackageTitle = styled.div`
   text-decoration: none;
   color: var(--bn-colors-editor-text);
-  cursor: pointer;
-  flex-basis: 100%
+  flex-basis: 100%;
+  font-weight: 500;
+    
+  a {
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--bn-colors-highlights-blue-text);
+
+    &:hover {
+        text-decoration: underline;
+    }
+  }
 `;
 
 function typeColor(workPackage: WorkPackage) {
@@ -297,7 +307,13 @@ const OpenProjectWorkPackageBlockComponent = ({
               {selectedWorkPackage._links?.status?.title}
             </WorkPackageStatus>
             <WorkPackageTitle>
-              <a href={linkToWorkPackage(block.props.wpid)}>
+              <a
+                href={linkToWorkPackage(block.props.wpid)}
+                onClick={(event) => {
+                        event.stopPropagation();
+                        window.open(linkToWorkPackage(block.props.wpid), '_blank', 'noopener,noreferrer');
+                      }}
+              >
                 {selectedWorkPackage.subject}
               </a>
             </WorkPackageTitle>
