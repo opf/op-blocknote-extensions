@@ -20,11 +20,14 @@ const Block = styled.div`
   width: 450px;
 `;
 
-const SearchContainer = styled.div`
+const Search = styled.div`
   position: relative;
   padding: 8px 16px;
   box-shadow: var(--bn-shadow-medium);
   border-radius: var(--bn-border-radius-large);
+`;
+
+const SearchLabel = styled.label`
 `;
 
 const SearchIconWrapper = styled.div`
@@ -49,41 +52,43 @@ const Dropdown = styled.div`
 `;
 
 const DropdownOption = styled.div<{ selected: boolean }>`
-  //padding: 8px 12px;
   cursor: pointer;
   background-color: ${({ selected }) => selected ? 'var(--bn-colors-highlights-gray-background)' : 'var(--bn-colors-menu-background)'};
   border: none;
 `;
 
 const WorkPackage = styled.div`
-  margin: 16px 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 `;
 
-const WorkPackageType = styled.span<{ color: string }>`
-  margin: 16px 8px;
+const WorkPackageType = styled.div<{ color: string }>`
+  // margin: 16px 8px;
   font-weight: bold;
   text-transform: uppercase;
   color: ${({ color }) => color};
 `;
 
-const WorkPackageId = styled.span`
-  margin: 16px 8px;
+const WorkPackageId = styled.div`
+  // margin: 16px 8px;
   color: #666;
 `;
 
-const WorkPackageStatus = styled.span<{ bgcolor?: string }>`
+const WorkPackageStatus = styled.div<{ bgcolor?: string }>`
   font-size: 0.8rem;
   border-radius: 12px;
-  margin: 16px 8px; 
+  // margin: 16px 8px; 
   border: 1px solid #ccc;
   background-color: ${({ bgcolor }) => bgcolor};
 `;
 
 const WorkPackageTitle = styled.div`
-  margin: 16px 8px;
+  // margin: 16px 8px;
   text-decoration: none;
   color: var(--bn-colors-editor-text);
   cursor: pointer;
+  flex-basis: 100%
 `;
 
 function typeColor(workPackage: WorkPackage) {
@@ -210,8 +215,8 @@ const OpenProjectWorkPackageBlockComponent = ({
     <Block>
       <div>
         {!block.props.wpid && (
-          <SearchContainer>
-            <label>
+          <Search>
+            <SearchLabel>
               Link existing work package
               <SearchIconWrapper>
                 <SearchIcon size={18} />
@@ -234,7 +239,7 @@ const OpenProjectWorkPackageBlockComponent = ({
                 }}
                 onKeyDown={handleKeyDown}
               />
-            </label>
+            </SearchLabel>
 
             {/* Autocomplete dropdown */}
             {isDropdownOpen && searchResults.length > 0 && (
@@ -262,14 +267,14 @@ const OpenProjectWorkPackageBlockComponent = ({
                     <WorkPackage>
                       <WorkPackageType color={typeColor(wp)}>{wp._links?.type?.title}</WorkPackageType>
                       <WorkPackageId>#{wp.id}</WorkPackageId>
-                      <WorkPackageStatus bgcolor={statusColor(wp)}>{wp.status}</WorkPackageStatus>
+                      <WorkPackageStatus bgcolor={statusColor(wp)}>{wp._links?.status?.title}</WorkPackageStatus>
                       <WorkPackageTitle>{wp.subject}</WorkPackageTitle>
                     </WorkPackage>
                   </DropdownOption>
                 ))}
               </Dropdown>
             )}
-          </SearchContainer>
+          </Search>
         )}
         {block.props.wpid && !selectedWorkPackage && (
           <div>
