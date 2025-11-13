@@ -45,46 +45,54 @@ const SearchInput = styled.input`
 
 const Dropdown = styled.div`
   background-color: var(--bn-colors-menu-background);
-  border: 1px solid #ccc;
-  border-radius: 0 0 4px 4px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  max-height: 200px;
   overflow-y: auto;
-  margin-top: 2px;
 `;
 
 const DropdownOption = styled.div<{ selected: boolean }>`
-  padding: 8px 12px;
+  //padding: 8px 12px;
   cursor: pointer;
   background-color: ${({ selected }) => selected ? 'var(--bn-colors-highlights-gray-background)' : 'var(--bn-colors-menu-background)'};
   border: none;
 `;
 
-const WorkPackageType = styled.span<{ color?: string }>`
-  gap: 8px;
+const WorkPackage = styled.div`
+  margin: 16px 8px;
+`;
+
+const WorkPackageType = styled.span<{ color: string }>`
+  margin: 16px 8px;
   font-weight: bold;
   text-transform: uppercase;
-  color: ${({ color }) => color || UI_BLUE};
+  color: ${({ color }) => color};
 `;
 
 const WorkPackageId = styled.span`
+  margin: 16px 8px;
   color: #666;
 `;
 
 const WorkPackageStatus = styled.span<{ bgcolor?: string }>`
   font-size: 0.8rem;
   border-radius: 12px;
-  padding: 2px 8px;
+  margin: 16px 8px; 
   border: 1px solid #ccc;
-  background-color: ${({ bgcolor }) => bgcolor || UI_BLUE};
+  background-color: ${({ bgcolor }) => bgcolor};
 `;
 
 const WorkPackageTitle = styled.div`
-  margin-right: 6px;
+  margin: 16px 8px;
   text-decoration: none;
-  color: #000091;
+  color: var(--bn-colors-editor-text);
   cursor: pointer;
 `;
+
+function typeColor(workPackage: WorkPackage) {
+  return workPackage._embedded?.type?.color || UI_BLUE;
+}
+
+function statusColor(workPackage: WorkPackage) {
+  return workPackage._embedded?.status?.color || UI_BLUE;
+}
 
 interface BlockProps {
   id: string,
@@ -251,10 +259,12 @@ const OpenProjectWorkPackageBlockComponent = ({
                     }}
                     onMouseEnter={() => setFocusedResultIndex(index)}
                   >
-                    <WorkPackageType color={wp._embedded?.type?.color}>{wp._links?.type?.title}</WorkPackageType>
-                    <WorkPackageId>{wp.id}</WorkPackageId>
-                    <WorkPackageStatus bgcolor={wp._embedded?.status?.color}>{wp.status}</WorkPackageStatus>
-                    <WorkPackageTitle>{wp.subject}</WorkPackageTitle>
+                    <WorkPackage>
+                      <WorkPackageType color={typeColor(wp)}>{wp._links?.type?.title}</WorkPackageType>
+                      <WorkPackageId>#{wp.id}</WorkPackageId>
+                      <WorkPackageStatus bgcolor={statusColor(wp)}>{wp.status}</WorkPackageStatus>
+                      <WorkPackageTitle>{wp.subject}</WorkPackageTitle>
+                    </WorkPackage>
                   </DropdownOption>
                 ))}
               </Dropdown>
@@ -280,11 +290,11 @@ const OpenProjectWorkPackageBlockComponent = ({
             </div>
 
             <div>
-              <WorkPackageLink
-                href={linkToWorkPackage(block.props.wpid)}
-              >
-                {selectedWorkPackage.subject}
-              </WorkPackageLink>
+              <WorkPackageTitle>
+                <a href={linkToWorkPackage(block.props.wpid)}>
+                  {selectedWorkPackage.subject}
+                </a>
+              </WorkPackageTitle>
             </div>
           </div>
         )}
