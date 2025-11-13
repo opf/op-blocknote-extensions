@@ -14,11 +14,6 @@ const FALLBACK_TYPE_COLOR = "#D4A72C";
 const FALLBACK_STATUS_COLOR = "#F1E5FF";
 
 const Block = styled.div`
-  padding: 12px 10px;
-  border: none;
-  border-radius: 5px;
-  background-color: var(--bn-colors-menu-background);
-  width: 450px;
 `;
 
 const Search = styled.div`
@@ -64,17 +59,22 @@ const DropdownOption = styled.div<{ selected: boolean }>`
 `;
 
 const WorkPackage = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 10px;
-  padding: 8px 10px;
+  padding: 8px 12px;
   background-color: var(--bn-colors-highlights-gray-background);
   border-radius: 4px;
+  min-width: 350px;
 `;
 
 const WorkPackageInDropdown = styled(WorkPackage)`
   padding: 4px 0;
   background-color: transparent;
+`;
+
+const WorkPackageDetails = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 10px;
+  width: 100%;
 `;
 
 const WorkPackageType = styled.div<{ color: string }>`
@@ -97,7 +97,7 @@ const WorkPackageStatus = styled.div<{ bgcolor?: string }>`
 `;
 
 const WorkPackageTitle = styled.div`
-  flex-basis: 100%;
+  flex-basis: max-content;
   color: var(--bn-colors-editor-text);
   font-weight: 500;
     
@@ -286,9 +286,11 @@ const OpenProjectWorkPackageBlockComponent = ({
                     onMouseEnter={() => setFocusedResultIndex(index)}
                   >
                     <WorkPackageInDropdown>
-                      <WorkPackageType color={typeColor(wp)}>{wp._links?.type?.title}</WorkPackageType>
-                      <WorkPackageId>#{wp.id}</WorkPackageId>
-                      <WorkPackageStatus bgcolor={statusColor(wp)}>{wp._links?.status?.title}</WorkPackageStatus>
+                      <WorkPackageDetails>
+                        <WorkPackageType color={typeColor(wp)}>{wp._links?.type?.title}</WorkPackageType>
+                        <WorkPackageId>#{wp.id}</WorkPackageId>
+                        <WorkPackageStatus bgcolor={statusColor(wp)}>{wp._links?.status?.title}</WorkPackageStatus>
+                      </WorkPackageDetails>
                       <WorkPackageTitle>{wp.subject}</WorkPackageTitle>
                     </WorkPackageInDropdown>
                   </DropdownOption>
@@ -305,13 +307,15 @@ const OpenProjectWorkPackageBlockComponent = ({
         {/* Display selected work package details */}
         {selectedWorkPackage && (
           <WorkPackage>
-            <WorkPackageType color={typeColor(selectedWorkPackage)}>
-              {selectedWorkPackage._links?.type?.title}
-            </WorkPackageType>
-            <WorkPackageId>#{selectedWorkPackage.id}</WorkPackageId>
-            <WorkPackageStatus bgcolor={statusColor(selectedWorkPackage)}>
-              {selectedWorkPackage._links?.status?.title}
-            </WorkPackageStatus>
+            <WorkPackageDetails>
+              <WorkPackageType color={typeColor(selectedWorkPackage)}>
+                {selectedWorkPackage._links?.type?.title}
+              </WorkPackageType>
+              <WorkPackageId>#{selectedWorkPackage.id}</WorkPackageId>
+              <WorkPackageStatus bgcolor={statusColor(selectedWorkPackage)}>
+                {selectedWorkPackage._links?.status?.title}
+              </WorkPackageStatus>
+            </WorkPackageDetails>
             <WorkPackageTitle>
               <a
                 href={linkToWorkPackage(block.props.wpid)}
