@@ -285,11 +285,11 @@ const OpenProjectWorkPackageBlockComponent = ({
         {selectedWorkPackage && (
           <div>
             <div style={{ display: "flex", gap: "8px" }}>
-              <WorkPackageType color={selectedWorkPackage._embedded?.type?.color}>
+              <WorkPackageType color={typeColor(selectedWorkPackage)}>
                 {selectedWorkPackage._links?.type?.title}
               </WorkPackageType>
               <WorkPackageId>#{selectedWorkPackage.id}</WorkPackageId>
-              <WorkPackageStatus bgcolor={selectedWorkPackage._embedded?.status?.color}>
+              <WorkPackageStatus bgcolor={statusColor(selectedWorkPackage)}>
                 {selectedWorkPackage._links?.status?.title}
               </WorkPackageStatus>
             </div>
