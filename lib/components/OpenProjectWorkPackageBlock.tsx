@@ -66,8 +66,11 @@ const DropdownOption = styled.div<{ selected: boolean }>`
 const WorkPackage = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 0 8px;
-  padding: 4px 0;
+  gap: 0 10px;
+  // padding: 4px 0; // TODO: for Dropdown
+  padding: 8px 10px;
+  background-color: var(--bn-colors-highlights-gray-background);
+  border-radius: 4px;
 `;
 
 const WorkPackageType = styled.div<{ color: string }>`
@@ -90,9 +93,8 @@ const WorkPackageStatus = styled.div<{ bgcolor?: string }>`
 `;
 
 const WorkPackageTitle = styled.div`
-  text-decoration: none;
-  color: var(--bn-colors-editor-text);
   flex-basis: 100%;
+  color: var(--bn-colors-editor-text);
   font-weight: 500;
     
   a {
