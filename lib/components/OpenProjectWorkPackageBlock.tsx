@@ -57,6 +57,7 @@ const DropdownOption = styled.div<{ selected: boolean }>`
   cursor: pointer;
   background-color: ${({ selected }) => selected ? 'var(--bn-colors-highlights-gray-background)' : 'var(--bn-colors-menu-background)'};
   border: none;
+  border-radius: 4px;
   margin: 4px 0;
 `;
 
