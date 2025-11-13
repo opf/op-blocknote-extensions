@@ -90,7 +90,6 @@ const WorkPackageStatus = styled.div<{ bgcolor?: string }>`
 `;
 
 const WorkPackageTitle = styled.div`
-  // margin: 16px 8px;
   text-decoration: none;
   color: var(--bn-colors-editor-text);
   cursor: pointer;
@@ -289,25 +288,20 @@ const OpenProjectWorkPackageBlockComponent = ({
         )}
         {/* Display selected work package details */}
         {selectedWorkPackage && (
-          <div>
-            <div style={{ display: "flex", gap: "8px" }}>
-              <WorkPackageType color={typeColor(selectedWorkPackage)}>
-                {selectedWorkPackage._links?.type?.title}
-              </WorkPackageType>
-              <WorkPackageId>#{selectedWorkPackage.id}</WorkPackageId>
-              <WorkPackageStatus bgcolor={statusColor(selectedWorkPackage)}>
-                {selectedWorkPackage._links?.status?.title}
-              </WorkPackageStatus>
-            </div>
-
-            <div>
-              <WorkPackageTitle>
-                <a href={linkToWorkPackage(block.props.wpid)}>
-                  {selectedWorkPackage.subject}
-                </a>
-              </WorkPackageTitle>
-            </div>
-          </div>
+          <WorkPackage>
+            <WorkPackageType color={typeColor(selectedWorkPackage)}>
+              {selectedWorkPackage._links?.type?.title}
+            </WorkPackageType>
+            <WorkPackageId>#{selectedWorkPackage.id}</WorkPackageId>
+            <WorkPackageStatus bgcolor={statusColor(selectedWorkPackage)}>
+              {selectedWorkPackage._links?.status?.title}
+            </WorkPackageStatus>
+            <WorkPackageTitle>
+              <a href={linkToWorkPackage(block.props.wpid)}>
+                {selectedWorkPackage.subject}
+              </a>
+            </WorkPackageTitle>
+          </WorkPackage>
         )}
       </div>
     </Block>
