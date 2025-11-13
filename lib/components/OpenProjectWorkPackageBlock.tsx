@@ -67,10 +67,14 @@ const WorkPackage = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 0 10px;
-  // padding: 4px 0; // TODO: for Dropdown
   padding: 8px 10px;
   background-color: var(--bn-colors-highlights-gray-background);
   border-radius: 4px;
+`;
+
+const WorkPackageInDropdown = styled(WorkPackage)`
+  padding: 4px 0;
+  background-color: transparent;
 `;
 
 const WorkPackageType = styled.div<{ color: string }>`
@@ -281,12 +285,12 @@ const OpenProjectWorkPackageBlockComponent = ({
                     }}
                     onMouseEnter={() => setFocusedResultIndex(index)}
                   >
-                    <WorkPackage>
+                    <WorkPackageInDropdown>
                       <WorkPackageType color={typeColor(wp)}>{wp._links?.type?.title}</WorkPackageType>
                       <WorkPackageId>#{wp.id}</WorkPackageId>
                       <WorkPackageStatus bgcolor={statusColor(wp)}>{wp._links?.status?.title}</WorkPackageStatus>
                       <WorkPackageTitle>{wp.subject}</WorkPackageTitle>
-                    </WorkPackage>
+                    </WorkPackageInDropdown>
                   </DropdownOption>
                 ))}
               </Dropdown>
