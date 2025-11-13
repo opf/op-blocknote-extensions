@@ -10,7 +10,8 @@ import { LinkIcon, SearchIcon } from "@primer/octicons-react";
 
 import styled from "styled-components";
 
-const UI_BLUE = "#000091"; // Default color for task status icons
+const FALLBACK_TYPE_COLOR = "#D4A72C";
+const FALLBACK_STATUS_COLOR = "#F1E5FF";
 
 const Block = styled.div`
   padding: 12px 10px;
@@ -49,37 +50,39 @@ const SearchInput = styled.input`
 const Dropdown = styled.div`
   background-color: var(--bn-colors-menu-background);
   overflow-y: auto;
+  padding-top: 8px;
 `;
 
 const DropdownOption = styled.div<{ selected: boolean }>`
   cursor: pointer;
   background-color: ${({ selected }) => selected ? 'var(--bn-colors-highlights-gray-background)' : 'var(--bn-colors-menu-background)'};
   border: none;
+  margin: 4px 0;
 `;
 
 const WorkPackage = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 0 8px;
+  padding: 4px 0;
 `;
 
 const WorkPackageType = styled.div<{ color: string }>`
-  // margin: 16px 8px;
-  font-weight: bold;
+  font-weight: 500;
   text-transform: uppercase;
   color: ${({ color }) => color};
 `;
 
 const WorkPackageId = styled.div`
-  // margin: 16px 8px;
-  color: #666;
+  color: var(--bn-colors-highlights-gray-text);
 `;
 
 const WorkPackageStatus = styled.div<{ bgcolor?: string }>`
   font-size: 0.8rem;
   border-radius: 12px;
-  // margin: 16px 8px; 
-  border: 1px solid #ccc;
+  border: 1px solid #ccc; // TODO: Border color based on background color
+  padding: 0 7px;
+  align-content: center;
   background-color: ${({ bgcolor }) => bgcolor};
 `;
 
@@ -92,11 +95,11 @@ const WorkPackageTitle = styled.div`
 `;
 
 function typeColor(workPackage: WorkPackage) {
-  return workPackage._embedded?.type?.color || UI_BLUE;
+  return workPackage._embedded?.type?.color || FALLBACK_TYPE_COLOR;
 }
 
 function statusColor(workPackage: WorkPackage) {
-  return workPackage._embedded?.status?.color || UI_BLUE;
+  return workPackage._embedded?.status?.color || FALLBACK_STATUS_COLOR;
 }
 
 interface BlockProps {
