@@ -6,7 +6,7 @@ import { useWorkPackage } from "../hooks/useWorkPackage";
 import { useWorkPackageSearch } from "../hooks/useWorkPackageSearch";
 import type { WorkPackage } from "../openProjectTypes";
 import { linkToWorkPackage } from "../services/openProjectApi";
-import { cacheColors, statusColor, typeColor } from "../services/colors";
+import { cacheColors, statusBackgroundColor, statusTextColor, typeColor } from "../services/colors";
 import { LinkIcon, SearchIcon } from "@primer/octicons-react";
 
 import styled from "styled-components";
@@ -89,13 +89,14 @@ const WorkPackageId = styled.div`
   color: var(--bn-colors-highlights-gray-text);
 `;
 
-const WorkPackageStatus = styled.div<{ bgcolor?: string }>`
+const WorkPackageStatus = styled.div<{ bgColor?: string, textColor?: string }>`
   font-size: 0.8rem;
   border-radius: 12px;
-  border: 1px solid #ccc; // TODO: Border color based on background color
+  border: 1px solid #ccc; // TODO: Border color based on background color!
   padding: 0 7px;
   align-content: center;
-  background-color: ${({ bgcolor }) => bgcolor};
+  color: ${({ textColor }) => textColor};
+  background-color: ${({ bgColor }) => bgColor};
 `;
 
 const WorkPackageTitle = styled.div`
@@ -284,7 +285,9 @@ const OpenProjectWorkPackageBlockComponent = ({
                       <WorkPackageDetails>
                         <WorkPackageType color={typeColor(wp)}>{wp._links?.type?.title}</WorkPackageType>
                         <WorkPackageId>#{wp.id}</WorkPackageId>
-                        <WorkPackageStatus bgcolor={statusColor(wp)}>{wp._links?.status?.title}</WorkPackageStatus>
+                        <WorkPackageStatus bgColor={statusBackgroundColor(wp)} textColor={statusTextColor(wp)}>
+                          {wp._links?.status?.title}
+                        </WorkPackageStatus>
                       </WorkPackageDetails>
                       <WorkPackageTitle>{wp.subject}</WorkPackageTitle>
                     </WorkPackageInDropdown>

@@ -16,13 +16,18 @@ export function typeColor(workPackage: WorkPackage) {
   return typeColors[typeId] || FALLBACK_TYPE_COLOR;
 }
 
-export function statusColor(workPackage: WorkPackage) {
+export function statusBackgroundColor(workPackage: WorkPackage) {
   cacheStatusColors();
 
   // In work packages the status id is not included, only title and link.
   // Since the title is not necessarily unique, the id is derived from the link.
   const statusId = workPackage._links.status.href.split("/").at(-1);
   return statusColors[statusId] || FALLBACK_STATUS_COLOR;
+}
+
+export function statusTextColor(workPackage: WorkPackage) {
+  const backgroundColor = statusBackgroundColor(workPackage);
+  return contrastingFontColor(backgroundColor);
 }
 
 export function cacheColors() {
@@ -52,4 +57,22 @@ function cacheStatusColors(){
   });
 }
 
+function contrastingFontColor(backgroundColor: string) {
+  if(isBright(backgroundColor)) {
+    return "#333333"
+  } else {
+    return "#FFFFFF"
+  }
+}
 
+function isBright(bgColor) {
+  const color = (bgColor.charAt(0) === '#') ? bgColor.substring(1, 7) : bgColor;
+  const red = parseInt(color.substring(0, 2), 16);
+  const green = parseInt(color.substring(2, 4), 16);
+  const blue = parseInt(color.substring(4, 6), 16);
+  return ((red * 0.299) + (green * 0.587) + (blue * 0.114)) >= 150;
+}
+
+function brightnessYiq(hexcolor) {
+  // https://stackoverflow.com/a/3943023/112731
+}
