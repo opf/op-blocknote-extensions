@@ -2,12 +2,15 @@
 import type { OpenProjectResponse, WorkPackage } from "../openProjectTypes";
 
 let baseUrl = "https://openproject.local";
+let statusColors:Record<string, string> = {};
+let typeColors:Record<string, string> = {};
 
 export function initOpenProjectApi(config: { baseUrl: string }) {
   baseUrl = config.baseUrl;
   if (baseUrl.endsWith('/')) {
     baseUrl = baseUrl.slice(0, -1);
   }
+  cacheStatusColors();
 }
 
 async function get<T>(endpoint: string): Promise<T> {
@@ -31,6 +34,18 @@ export function fetchWorkPackage(id: string): Promise<WorkPackage> {
 
 export function fetchStatuses(): Promise<OpenProjectResponse> {
   return get<OpenProjectResponse>(`/api/v3/statuses`);
+}
+
+function cacheStatusColors(){
+  const response = fetchStatuses();
+  response.then(data => {
+    data._embedded?.elements?.forEach(element => {
+      statusColors[element.id] = element.color;
+    })
+  });
+}
+export function getStatusColors(): Record<string, string>{
+  return statusColors;
 }
 
 export function fetchProjectTypes(projectId: string): Promise<OpenProjectResponse> {

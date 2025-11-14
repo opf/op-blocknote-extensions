@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useWorkPackage } from "../hooks/useWorkPackage";
 import { useWorkPackageSearch } from "../hooks/useWorkPackageSearch";
 import type { WorkPackage } from "../openProjectTypes";
-import { linkToWorkPackage } from "../services/openProjectApi";
+import { linkToWorkPackage, getStatusColors } from "../services/openProjectApi";
 import { LinkIcon, SearchIcon } from "@primer/octicons-react";
 
 import styled from "styled-components";
@@ -120,7 +120,10 @@ function typeColor(workPackage: WorkPackage) {
 }
 
 function statusColor(workPackage: WorkPackage) {
-  return workPackage._embedded?.status?.color || FALLBACK_STATUS_COLOR;
+  // In workpackages status id is not included, only title and link.
+  // Since the title is not necessarily unique, the id is derived from the link.
+  const statusId = workPackage._links.status.href.split("/").at(-1)
+  return getStatusColors()[statusId] || FALLBACK_STATUS_COLOR;
 }
 
 interface BlockProps {
