@@ -5,13 +5,12 @@ import React, { useEffect, useRef, useState } from "react";
 import { useWorkPackage } from "../hooks/useWorkPackage";
 import { useWorkPackageSearch } from "../hooks/useWorkPackageSearch";
 import type { WorkPackage } from "../openProjectTypes";
-import {linkToWorkPackage, fetchTypes, fetchStatuses} from "../services/openProjectApi";
+import { linkToWorkPackage } from "../services/openProjectApi";
+import { cacheColors, statusColor, typeColor } from "../services/colors";
 import { LinkIcon, SearchIcon } from "@primer/octicons-react";
 
 import styled from "styled-components";
 
-const FALLBACK_TYPE_COLOR = "#D4A72C";
-const FALLBACK_STATUS_COLOR = "#F1E5FF";
 const SPACER_S = "4px";
 const SPACER_M = "8px";
 const SPACER_L = "12px";
@@ -114,53 +113,6 @@ const WorkPackageTitle = styled.div`
     }
   }
 `;
-
-const statusColors:Record<string, string> = {};
-const typeColors:Record<string, string> = {};
-
-function cacheColors() {
-  cacheTypeColors();
-  cacheStatusColors();
-}
-function cacheTypeColors(){
-  if (Object.keys(typeColors).length > 0) return;
-
-  const response = fetchTypes();
-  response.then(data => {
-    data._embedded?.elements?.forEach(element => {
-      typeColors[element.id] = element.color;
-    })
-  });
-}
-
-function cacheStatusColors(){
-  if (Object.keys(statusColors).length > 0) return;
-
-  const response = fetchStatuses();
-  response.then(data => {
-    data._embedded?.elements?.forEach(element => {
-      statusColors[element.id] = element.color;
-    })
-  });
-}
-
-function typeColor(workPackage: WorkPackage) {
-  cacheTypeColors();
-
-  // In work packages the type id is not included, only title and link.
-  // Since the title is not necessarily unique, the id is derived from the link./
-  const typeId = workPackage._links.type.href.split("/").at(-1);
-  return typeColors[typeId] || FALLBACK_TYPE_COLOR;
-}
-
-function statusColor(workPackage: WorkPackage) {
-  cacheStatusColors();
-
-  // In work packages the status id is not included, only title and link.
-  // Since the title is not necessarily unique, the id is derived from the link.
-  const statusId = workPackage._links.status.href.split("/").at(-1);
-  return statusColors[statusId] || FALLBACK_STATUS_COLOR;
-}
 
 interface BlockProps {
   id: string,
