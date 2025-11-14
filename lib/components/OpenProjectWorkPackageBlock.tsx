@@ -62,7 +62,6 @@ const WorkPackage = styled.div`
   padding: 8px 12px;
   background-color: var(--bn-colors-highlights-gray-background);
   border-radius: 4px;
-  min-width: 350px;
 `;
 
 const WorkPackageInDropdown = styled(WorkPackage)`
