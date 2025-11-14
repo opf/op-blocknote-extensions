@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useWorkPackage } from "../hooks/useWorkPackage";
 import { useWorkPackageSearch } from "../hooks/useWorkPackageSearch";
 import type { WorkPackage } from "../openProjectTypes";
-import { linkToWorkPackage, getStatusColors } from "../services/openProjectApi";
+import {linkToWorkPackage, getStatusColors, getTypeColors} from "../services/openProjectApi";
 import { LinkIcon, SearchIcon } from "@primer/octicons-react";
 
 import styled from "styled-components";
@@ -116,13 +116,16 @@ const WorkPackageTitle = styled.div`
 `;
 
 function typeColor(workPackage: WorkPackage) {
-  return workPackage._embedded?.type?.color || FALLBACK_TYPE_COLOR;
+  // In work packages the type id is not included, only title and link.
+  // Since the title is not necessarily unique, the id is derived from the link./
+  const typeId = workPackage._links.type.href.split("/").at(-1);
+  return getTypeColors()[typeId] || FALLBACK_TYPE_COLOR;
 }
 
 function statusColor(workPackage: WorkPackage) {
-  // In workpackages status id is not included, only title and link.
+  // In work packages the status id is not included, only title and link.
   // Since the title is not necessarily unique, the id is derived from the link.
-  const statusId = workPackage._links.status.href.split("/").at(-1)
+  const statusId = workPackage._links.status.href.split("/").at(-1);
   return getStatusColors()[statusId] || FALLBACK_STATUS_COLOR;
 }
 

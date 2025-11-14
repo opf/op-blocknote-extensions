@@ -2,8 +2,8 @@
 import type { OpenProjectResponse, WorkPackage } from "../openProjectTypes";
 
 let baseUrl = "https://openproject.local";
-let statusColors:Record<string, string> = {};
-let typeColors:Record<string, string> = {};
+const statusColors:Record<string, string> = {};
+const typeColors:Record<string, string> = {};
 
 export function initOpenProjectApi(config: { baseUrl: string }) {
   baseUrl = config.baseUrl;
@@ -11,6 +11,7 @@ export function initOpenProjectApi(config: { baseUrl: string }) {
     baseUrl = baseUrl.slice(0, -1);
   }
   cacheStatusColors();
+  cacheTypeColors();
 }
 
 async function get<T>(endpoint: string): Promise<T> {
@@ -32,10 +33,6 @@ export function fetchWorkPackage(id: string): Promise<WorkPackage> {
   return get<WorkPackage>(`/api/v3/work_packages/${id}`);
 }
 
-export function fetchStatuses(): Promise<OpenProjectResponse> {
-  return get<OpenProjectResponse>(`/api/v3/statuses`);
-}
-
 function cacheStatusColors(){
   const response = fetchStatuses();
   response.then(data => {
@@ -44,12 +41,33 @@ function cacheStatusColors(){
     })
   });
 }
+
+function fetchStatuses(): Promise<OpenProjectResponse> {
+  return get<OpenProjectResponse>(`/api/v3/statuses`);
+}
+
 export function getStatusColors(): Record<string, string>{
+  // if(statusColors.length() === 0) {
+  //   cacheStatusColors();
+  // }
   return statusColors;
 }
 
-export function fetchProjectTypes(projectId: string): Promise<OpenProjectResponse> {
-  return get<OpenProjectResponse>(`/api/v3/projects/${projectId}/types`);
+function cacheTypeColors(){
+  const response = fetchTypes();
+  response.then(data => {
+    data._embedded?.elements?.forEach(element => {
+      typeColors[element.id] = element.color;
+    })
+  });
+}
+
+function fetchTypes(): Promise<OpenProjectResponse> {
+  return get<OpenProjectResponse>(`/api/v3/types`);
+}
+
+export function getTypeColors(): Record<string, string>{
+  return typeColors;
 }
 
 export async function searchWorkPackages(query: string): Promise<WorkPackage[]> {
