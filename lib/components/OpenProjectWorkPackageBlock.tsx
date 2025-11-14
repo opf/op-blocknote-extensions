@@ -12,13 +12,17 @@ import styled from "styled-components";
 
 const FALLBACK_TYPE_COLOR = "#D4A72C";
 const FALLBACK_STATUS_COLOR = "#F1E5FF";
+const SPACER_S = "4px";
+const SPACER_M = "8px";
+const SPACER_L = "12px";
+const SPACER_XL = "16px";
 
 const Block = styled.div`
 `;
 
 const Search = styled.div`
   position: relative;
-  padding: 8px 16px;
+  padding: ${SPACER_M} ${SPACER_XL};
   box-shadow: var(--bn-shadow-medium);
   border-radius: var(--bn-border-radius-large);
 `;
@@ -28,15 +32,15 @@ const SearchLabel = styled.label`
 
 const SearchIconWrapper = styled.div`
   position: absolute;
-  margin-top: 8px;
-  padding-top: 4px;
-  padding-left: 8px;
+  margin-top: ${SPACER_M};
+  padding-top: ${SPACER_S};
+  padding-left: ${SPACER_M};
 `;
 const SearchInput = styled.input`
   width: 100%;
-  margin-top: 8px;
-  padding: 8px 12px;
-  padding-left: 30px;
+  margin-top: ${SPACER_M};
+  padding: ${SPACER_M} ${SPACER_L};
+  padding-left: 30px; // room for the search icon
   border: 1px solid #ccc;
   border-radius: var(--bn-border-radius-small);
   font-size: 14px;
@@ -45,8 +49,8 @@ const SearchInput = styled.input`
 const Dropdown = styled.div`
   background-color: var(--bn-colors-menu-background);
   overflow-y: auto;
-  padding-top: 8px;
-  margin: 0 -8px;
+  padding-top: ${SPACER_M};
+  margin: 0 -${SPACER_M};
 `;
 
 const DropdownOption = styled.div<{ selected: boolean }>`
@@ -54,18 +58,18 @@ const DropdownOption = styled.div<{ selected: boolean }>`
   background-color: ${({ selected }) => selected ? 'var(--bn-colors-highlights-gray-background)' : 'var(--bn-colors-menu-background)'};
   border: none;
   border-radius: var(--bn-border-radius-small);
-  margin: 4px 0;
-  padding: 0 8px;
+  margin: ${SPACER_S} 0;
+  padding: 0 ${SPACER_M};
 `;
 
 const WorkPackage = styled.div`
-  padding: 8px 12px;
+  padding: ${SPACER_M} ${SPACER_L};
   background-color: var(--bn-colors-highlights-gray-background);
   border-radius: var(--bn-border-radius-small);
 `;
 
 const WorkPackageInDropdown = styled(WorkPackage)`
-  padding: 4px 0;
+  padding: ${SPACER_S} 0;
   background-color: transparent;
 `;
 
