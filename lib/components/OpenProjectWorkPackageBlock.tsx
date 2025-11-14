@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useWorkPackage } from "../hooks/useWorkPackage";
 import { useWorkPackageSearch } from "../hooks/useWorkPackageSearch";
 import type { WorkPackage } from "../openProjectTypes";
-import {linkToWorkPackage, getStatusColors, getTypeColors} from "../services/openProjectApi";
+import {linkToWorkPackage, fetchTypes, fetchStatuses} from "../services/openProjectApi";
 import { LinkIcon, SearchIcon } from "@primer/octicons-react";
 
 import styled from "styled-components";
@@ -115,18 +115,47 @@ const WorkPackageTitle = styled.div`
   }
 `;
 
+const statusColors:Record<string, string> = {};
+const typeColors:Record<string, string> = {};
+
+function cacheTypeColors(){
+  if (Object.keys(typeColors).length > 0) return;
+
+  const response = fetchTypes();
+  response.then(data => {
+    data._embedded?.elements?.forEach(element => {
+      typeColors[element.id] = element.color;
+    })
+  });
+}
+
+function cacheStatusColors(){
+  if (Object.keys(statusColors).length > 0) return;
+
+  const response = fetchStatuses();
+  response.then(data => {
+    data._embedded?.elements?.forEach(element => {
+      statusColors[element.id] = element.color;
+    })
+  });
+}
+
 function typeColor(workPackage: WorkPackage) {
+  cacheTypeColors();
+
   // In work packages the type id is not included, only title and link.
   // Since the title is not necessarily unique, the id is derived from the link./
   const typeId = workPackage._links.type.href.split("/").at(-1);
-  return getTypeColors()[typeId] || FALLBACK_TYPE_COLOR;
+  return typeColors[typeId] || FALLBACK_TYPE_COLOR;
 }
 
 function statusColor(workPackage: WorkPackage) {
+  cacheStatusColors();
+
   // In work packages the status id is not included, only title and link.
   // Since the title is not necessarily unique, the id is derived from the link.
   const statusId = workPackage._links.status.href.split("/").at(-1);
-  return getStatusColors()[statusId] || FALLBACK_STATUS_COLOR;
+  return statusColors[statusId] || FALLBACK_STATUS_COLOR;
 }
 
 interface BlockProps {
@@ -257,6 +286,8 @@ const OpenProjectWorkPackageBlockComponent = ({
                 placeholder={"Search for work package ID or subject"}
                 value={searchQuery}
                 onChange={(e) => {
+                  cacheStatusColors(); // preload status colors once
+                  cacheTypeColors(); // preload type colors once
                   setSearchQuery(e.target.value);
                   if (e.target.value) {
                     setIsDropdownOpen(true);
