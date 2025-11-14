@@ -37,8 +37,8 @@ const SearchInput = styled.input`
   margin-top: 8px;
   padding: 8px 12px;
   padding-left: 30px;
-  border-radius: 4px;
   border: 1px solid #ccc;
+  border-radius: var(--bn-border-radius-small);
   font-size: 14px;
 `;
 
@@ -53,7 +53,7 @@ const DropdownOption = styled.div<{ selected: boolean }>`
   cursor: pointer;
   background-color: ${({ selected }) => selected ? 'var(--bn-colors-highlights-gray-background)' : 'var(--bn-colors-menu-background)'};
   border: none;
-  border-radius: 4px;
+  border-radius: var(--bn-border-radius-small);
   margin: 4px 0;
   padding: 0 8px;
 `;
@@ -61,7 +61,7 @@ const DropdownOption = styled.div<{ selected: boolean }>`
 const WorkPackage = styled.div`
   padding: 8px 12px;
   background-color: var(--bn-colors-highlights-gray-background);
-  border-radius: 4px;
+  border-radius: var(--bn-border-radius-small);
 `;
 
 const WorkPackageInDropdown = styled(WorkPackage)`
