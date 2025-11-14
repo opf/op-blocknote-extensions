@@ -65,14 +65,19 @@ function contrastingFontColor(backgroundColor: string) {
   }
 }
 
-function isBright(bgColor) {
-  const color = (bgColor.charAt(0) === '#') ? bgColor.substring(1, 7) : bgColor;
-  const red = parseInt(color.substring(0, 2), 16);
-  const green = parseInt(color.substring(2, 4), 16);
-  const blue = parseInt(color.substring(4, 6), 16);
-  return ((red * 0.299) + (green * 0.587) + (blue * 0.114)) >= 150;
+// Adapted from OpenProject's Colors::HexColor
+function isBright(givenColor: string) {
+  const color = cleanColorString(givenColor);
+
+  const redHex = parseInt(color.substring(0, 2), 16);
+  const greenHex = parseInt(color.substring(2, 4), 16);
+  const blueHex = parseInt(color.substring(4, 6), 16);
+
+  return ((redHex * 0.299) + (greenHex * 0.587) + (blueHex * 0.114)) >= 150;
 }
 
-function brightnessYiq(hexcolor) {
-  // https://stackoverflow.com/a/3943023/112731
+function cleanColorString(colorString: string) {
+  return colorString
+    .replace("#", "")
+    .padEnd(6, "0");
 }
