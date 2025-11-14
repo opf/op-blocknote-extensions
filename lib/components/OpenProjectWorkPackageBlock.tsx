@@ -118,6 +118,10 @@ const WorkPackageTitle = styled.div`
 const statusColors:Record<string, string> = {};
 const typeColors:Record<string, string> = {};
 
+function cacheColors() {
+  cacheTypeColors();
+  cacheStatusColors();
+}
 function cacheTypeColors(){
   if (Object.keys(typeColors).length > 0) return;
 
@@ -286,8 +290,7 @@ const OpenProjectWorkPackageBlockComponent = ({
                 placeholder={"Search for work package ID or subject"}
                 value={searchQuery}
                 onChange={(e) => {
-                  cacheStatusColors(); // preload status colors once
-                  cacheTypeColors(); // preload type colors once
+                  cacheColors(); // preload status and type colors once before search
                   setSearchQuery(e.target.value);
                   if (e.target.value) {
                     setIsDropdownOpen(true);
