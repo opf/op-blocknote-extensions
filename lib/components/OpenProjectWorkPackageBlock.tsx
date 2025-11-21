@@ -128,18 +128,19 @@ const WorkPackageTitle = styled.div`
 `;
 
 const UnavailableMessage = styled.div`
+  color: var(--bn-colors-editor-text) !important;
 `
 
 const UnavailableMessageHeader = styled.div`
   font-weight: 600;
+  color: var(--bn-colors-editor-text) !important;
 `
 
 interface BlockProps {
   id: string,
   props: {
     wpid: string;
-    subject: string;
-    href: string;
+    href: string; // TODO: Can we still have that persisted? Or does this leak information as well?
   };
 }
 
