@@ -371,14 +371,13 @@ export const openProjectWorkPackageStaticBlockSpec = createBlockSpec(
   {
     render: (block) => {
       const wpid = block.props.wpid || "unknown";
-      const subject = block.props.subject || "Work Package";
       const href = block.props.href || "#";
       
       const anchor = document.createElement("a");
       anchor.href = href;
       anchor.target = "_blank";
       anchor.rel = "noopener noreferrer";
-      anchor.textContent = `#${wpid} - ${subject}`;
+      anchor.textContent = `#${wpid}`;
 
       return {
         dom: anchor,
