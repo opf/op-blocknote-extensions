@@ -201,6 +201,7 @@ const OpenProjectWorkPackageBlockComponent = ({
   const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  let cursorPosition = editor.getTextCursorPosition();
 
   // Fetch and cache colors.
   // The hook handles triggering re-renders when data arrives.
@@ -265,6 +266,7 @@ const OpenProjectWorkPackageBlockComponent = ({
         wpid: workPackage.id,
       },
     });
+    setNewCursorPosition(editor, cursorPosition);
   };
 
   // Handle keyboard navigation
@@ -445,4 +447,14 @@ function calculateAliases(): string[] {
   }
 
   return combinations;
+}
+
+function setNewCursorPosition(editor, cursorPosition) {
+  if (cursorPosition.nextBlock) {
+    editor.setTextCursorPosition(cursorPosition.nextBlock.id, "start");
+    return
+  }
+  if (cursorPosition.block) {
+    editor.setTextCursorPosition(cursorPosition.block.id, "end");
+  }
 }
