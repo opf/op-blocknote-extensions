@@ -4,10 +4,10 @@ export const en = {
       "title": "Link to existing work package",
       "subtext": "Add a dynamic link to a single work package",
       "aliases": {
-        "workpackage": "workpackage",
-        "work package": "work package",
-        "wp": "wp",
-        "link": "link"
+        "workpackage": "paquetedetrabajo",
+        "work package": "paquete de trabajo",
+        "wp": "pt",
+        "link": "enlance"
       }
     },
     "search": {
