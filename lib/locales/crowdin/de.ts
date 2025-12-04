@@ -1,32 +1,32 @@
 export const en = {
   translation: {
     "slashMenu": {
-      "title": "Link to existing work package",
-      "subtext": "Add a dynamic link to a single work package",
+      "title": "Vorhandenes Arbeitspaket verlinken",
+      "subtext": "Link zu einem einzelnen Arbeitspaket hinzufügen",
       "aliases": {
-        "workpackage": "workpackage",
+        "workpackage": "Arbeitspaket",
         "work package": "work package",
         "wp": "wp",
         "link": "link"
       }
     },
     "search": {
-      "label": "Link existing work package",
-      "placeholder": "Search for work package ID or subject",
-      "dropdownAriaLabel": "Work package search results"
+      "label": "Bestehendes Arbeitspaket verlinken",
+      "placeholder": "Nach ID oder Betreff suchen",
+      "dropdownAriaLabel": "Suchergebnisse (Arbeitspakete)"
     },
     "unavailableWorkPackage": {
       "loading": {
-        "header": "Loading",
-        "message": "Please wait"
+        "header": "Lädt",
+        "message": "Bitte warten"
       },
       "unauthorized": {
-        "header": "Linked work package unavailable",
-        "message": "You do not have permission to see this"
+        "header": "Das verlinkte Arbeitspaket ist nicht verfügbar",
+        "message": "Aufgrund fehlender Berechtigungen kann es nicht angezeigt werden"
       },
       "error": {
-        "header": "Error",
-        "message": "Could not load work package"
+        "header": "Fehler",
+        "message": "Arbeitspaket konnte nicht geladen werden"
       }
     }
   }
