@@ -1,32 +1,32 @@
 export const en = {
   translation: {
     "slashMenu": {
-      "title": "Link to existing work package",
-      "subtext": "Add a dynamic link to a single work package",
+      "title": "Lien vers un lot de travaux existant",
+      "subtext": "Ajouter un lien dynamique à un lot de travaux unique",
       "aliases": {
         "workpackage": "workpackage",
-        "work package": "work package",
+        "work package": "lot de travaux",
         "wp": "wp",
-        "link": "link"
+        "link": "lien"
       }
     },
     "search": {
-      "label": "Link existing work package",
-      "placeholder": "Search for work package ID or subject",
-      "dropdownAriaLabel": "Work package search results"
+      "label": "Lien vers un lot de travaux existant",
+      "placeholder": "Rechercher l'ID ou le sujet du lot de travaux",
+      "dropdownAriaLabel": "Résultats de la recherche de lots de travaux"
     },
     "unavailableWorkPackage": {
       "loading": {
-        "header": "Loading",
-        "message": "Please wait"
+        "header": "Сhargement",
+        "message": "Veuillez patienter"
       },
       "unauthorized": {
-        "header": "Linked work package unavailable",
-        "message": "You do not have permission to see this"
+        "header": "Le lot de travaux lié n'est pas disponible",
+        "message": "Vous n'avez pas l'autorisation de voir ce contenu"
       },
       "error": {
-        "header": "Error",
-        "message": "Could not load work package"
+        "header": "Erreur",
+        "message": "Impossible de charger le lot de travaux"
       }
     }
   }
