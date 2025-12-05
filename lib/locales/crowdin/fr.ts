@@ -1,18 +1,12 @@
 export const en = {
   translation: {
     "slashMenu": {
-      "title": "Lien vers un lot de travaux existant",
-      "subtext": "Ajouter un lien dynamique à un lot de travaux unique",
-      "aliases": {
-        "workpackage": "workpackage",
-        "work package": "lot de travaux",
-        "wp": "wp",
-        "link": "lien"
-      }
+      "title": "Link existing work package",
+      "subtext": "Ajouter un lien dynamique à un lot de travaux unique"
     },
     "search": {
       "label": "Lien vers un lot de travaux existant",
-      "placeholder": "Rechercher l'ID ou le sujet du lot de travaux",
+      "placeholder": "Search by work package ID or subject",
       "dropdownAriaLabel": "Résultats de la recherche de lots de travaux"
     },
     "unavailableWorkPackage": {

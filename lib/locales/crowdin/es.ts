@@ -1,18 +1,12 @@
 export const en = {
   translation: {
     "slashMenu": {
-      "title": "Vincular el paquete de trabajo existente",
-      "subtext": "Añadir un enlace dinámico a un solo paquete de trabajo",
-      "aliases": {
-        "workpackage": "paquetedetrabajo",
-        "work package": "paquete de trabajo",
-        "wp": "pt",
-        "link": "enlance"
-      }
+      "title": "Link existing work package",
+      "subtext": "Añadir un enlace dinámico a un solo paquete de trabajo"
     },
     "search": {
       "label": "Vincular el paquete de trabajo existente",
-      "placeholder": "Buscar paquete de trabajo por ID o asunto",
+      "placeholder": "Search by work package ID or subject",
       "dropdownAriaLabel": "Resultados de la búsqueda de paquetes de trabajo"
     },
     "unavailableWorkPackage": {
