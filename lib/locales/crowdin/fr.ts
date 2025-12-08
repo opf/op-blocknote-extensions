@@ -1,13 +1,13 @@
 export const en = {
   translation: {
     "slashMenu": {
-      "title": "Link existing work package",
+      "title": "Lien vers un lot de travaux existant",
       "subtext": "Ajouter un lien dynamique à un lot de travaux unique",
       "aliases": {
         "workpackage": "workpackage",
-        "work package": "work package",
-        "wp": "wp",
-        "link": "link"
+        "work package": "lot de travaux",
+        "wp": "lt",
+        "link": "lien"
       }
     },
     "search": {
