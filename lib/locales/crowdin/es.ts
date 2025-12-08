@@ -12,7 +12,7 @@ export const en = {
     },
     "search": {
       "label": "Vincular el paquete de trabajo existente",
-      "placeholder": "Search by work package ID or subject",
+      "placeholder": "Buscar paquete de trabajo por ID o asunto",
       "dropdownAriaLabel": "Resultados de la búsqueda de paquetes de trabajo"
     },
     "unavailableWorkPackage": {
