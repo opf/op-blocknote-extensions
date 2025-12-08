@@ -1,4 +1,4 @@
-import type { DefaultBlockSchema } from "@blocknote/core";
+import { type DefaultBlockSchema} from "@blocknote/core";
 import { BlockNoteEditor, createBlockConfig, createBlockSpec, insertOrUpdateBlock } from "@blocknote/core";
 import { createReactBlockSpec } from "@blocknote/react";
 import React, { useEffect, useRef, useState } from "react";
@@ -424,17 +424,23 @@ export const openProjectWorkPackageStaticBlockSpec = createBlockSpec(
   }
 );
 
-export const openProjectWorkPackageSlashMenu = (
-  editor: BlockNoteEditor<
-    DefaultBlockSchema & {
-    openProjectWorkPackage: ReturnType<typeof openprojectWorkPackageBlockConfig>;
-  }
-  >
-) => ({
-// export const openProjectWorkPackageSlashMenu = (editor: any) => ({
+// const schema = BlockNoteSchema.create().extend({
+//   blockSpecs: {
+//     openProjectWorkPackage: openProjectWorkPackageBlockSpec(),
+//   },
+// });
+
+// export const openProjectWorkPackageSlashMenu = (
+//   editor: BlockNoteEditor<
+//     DefaultBlockSchema & {
+//     openProjectWorkPackage: ReturnType<typeof openprojectWorkPackageBlockConfig>;
+//   }
+//   >
+// ) => ({
+export const openProjectWorkPackageSlashMenu = (editor: BlockNoteEditor<any>) => ({
   title: i18n.t("slashMenu.title"),
   onItemClick: () => insertOrUpdateBlock(editor, { type: "openProjectWorkPackage", props: { wpid: "", uuid: uuid} }),
-  aliases: [...getAliases()],
+  aliases: [...calculateAliases()],
   group: "OpenProject",
   icon: <LinkIcon size={18} />,
   subtext: i18n.t("slashMenu.subtext"),
