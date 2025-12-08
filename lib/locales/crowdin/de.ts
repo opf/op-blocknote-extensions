@@ -1,12 +1,18 @@
 export const en = {
   translation: {
     "slashMenu": {
-      "title": "Link existing work package",
-      "subtext": "Link zu einem einzelnen Arbeitspaket hinzufügen"
+      "title": "Vorhandenes Arbeitspaket verlinken",
+      "subtext": "Link zu einem einzelnen Arbeitspaket hinzufügen",
+      "aliases": {
+        "workpackage": "Arbeitspaket",
+        "work package": "work package",
+        "wp": "ap",
+        "link": "link"
+      }
     },
     "search": {
       "label": "Vorhandenes Arbeitspaket verlinken",
-      "placeholder": "Search by work package ID or subject",
+      "placeholder": "Nach ID oder Betreff suchen",
       "dropdownAriaLabel": "Suchergebnisse (Arbeitspakete)"
     },
     "unavailableWorkPackage": {
