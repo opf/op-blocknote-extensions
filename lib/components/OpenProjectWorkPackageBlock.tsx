@@ -13,6 +13,10 @@ import i18n from "../services/i18n.ts"; // localize other code
 import { LinkIcon, SearchIcon } from "@primer/octicons-react";
 import styled from "styled-components";
 
+const uuid = Math.random().toString(36); // TODO: replace with uuid?!
+
+debugger;
+
 const SPACER_S = "4px";
 const SPACER_M = "8px";
 const SPACER_L = "12px";
@@ -145,6 +149,7 @@ interface BlockProps {
   id: string,
   props: {
     wpid: string;
+    uuid: string;
   };
 }
 
@@ -298,11 +303,13 @@ const OpenProjectWorkPackageBlockComponent = ({
     }
   };
 
+  // debugger;
+
   return (
     <Block>
       <div>
         {/* Show search dialog if no work package is selected yet */}
-        {!block.props.wpid && (
+        {!block.props.wpid && block.props.uuid == uuid && (
           <Search>
             <SearchLabel>
               {t("search.label")}
@@ -385,6 +392,7 @@ export const openprojectWorkPackageBlockConfig = createBlockConfig(
     type: "openProjectWorkPackage",
     propSchema: {
       wpid: { default: "" },
+      uuid: { default: "" },
     },
     content: "none",
   }) as const
@@ -416,10 +424,17 @@ export const openProjectWorkPackageStaticBlockSpec = createBlockSpec(
   }
 );
 
-export const openProjectWorkPackageSlashMenu = (editor: any) => ({
+export const openProjectWorkPackageSlashMenu = (
+  editor: BlockNoteEditor<
+    DefaultBlockSchema & {
+    openProjectWorkPackage: ReturnType<typeof openprojectWorkPackageBlockConfig>;
+  }
+  >
+) => ({
+// export const openProjectWorkPackageSlashMenu = (editor: any) => ({
   title: i18n.t("slashMenu.title"),
-  onItemClick: () => insertOrUpdateBlock(editor, { type: "openProjectWorkPackage" }),
-  aliases: [...calculateAliases()],
+  onItemClick: () => insertOrUpdateBlock(editor, { type: "openProjectWorkPackage", props: { wpid: "", uuid: uuid} }),
+  aliases: [...getAliases()],
   group: "OpenProject",
   icon: <LinkIcon size={18} />,
   subtext: i18n.t("slashMenu.subtext"),
