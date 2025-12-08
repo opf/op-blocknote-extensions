@@ -2,7 +2,13 @@ export const en = {
   translation: {
     "slashMenu": {
       "title": "Link existing work package",
-      "subtext": "Añadir un enlace dinámico a un solo paquete de trabajo"
+      "subtext": "Añadir un enlace dinámico a un solo paquete de trabajo",
+      "aliases": {
+        "workpackage": "workpackage",
+        "work package": "work package",
+        "wp": "wp",
+        "link": "link"
+      }
     },
     "search": {
       "label": "Vincular el paquete de trabajo existente",
