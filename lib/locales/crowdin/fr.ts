@@ -12,7 +12,7 @@ export const en = {
     },
     "search": {
       "label": "Lien vers un lot de travaux existant",
-      "placeholder": "Search by work package ID or subject",
+      "placeholder": "Rechercher l'ID ou le sujet du lot de travaux",
       "dropdownAriaLabel": "Résultats de la recherche de lots de travaux"
     },
     "unavailableWorkPackage": {
