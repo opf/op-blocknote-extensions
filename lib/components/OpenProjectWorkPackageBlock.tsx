@@ -19,11 +19,23 @@ const SPACER_M = "8px";
 const SPACER_L = "12px";
 const SPACER_XL = "16px";
 
+/**
+ * @see
+ *  - https://primer.style/foundations/typography/
+ *  - https://github.com/primer/css/blob/main/src/support/variables/typography.scss
+ *
+*/
+const PRIMER_FONT_STACK = "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji'";
+const PRIMER_BODY_FONT_SIZE = "14px";
+const PRIMER_FONT_SIZE_SMALL = "12px";
+
 const Block = styled.div`
     --highlight-wp-background: var(--bn-colors-highlights-gray-background);
     [data-color-scheme="dark"] & {
         --highlight-wp-background: var(--bn-colors-disabled-text);
     }
+    font-size: ${PRIMER_BODY_FONT_SIZE};
+    font-family: ${PRIMER_FONT_STACK};
 `;
 
 const Search = styled.div`
@@ -58,7 +70,6 @@ const SearchInput = styled.input`
   padding-left: 30px !important; // room for the search icon
   border: 1px solid #ccc;
   border-radius: var(--bn-border-radius-small);
-  font-size: 14px;
 `;
 
 const Dropdown = styled.div`
@@ -84,7 +95,7 @@ const WorkPackage = styled.div<{ in_dropdown?: string }>`
   border-radius: var(--bn-border-radius-small);
   ${({ in_dropdown }) => in_dropdown && JSON.parse(in_dropdown) && `
     padding: ${SPACER_S} 0;
-    background-color: transparent; 
+    background-color: transparent;
   `}
 `;
 
@@ -93,6 +104,7 @@ const WorkPackageDetails = styled.div`
   flex-wrap: wrap;
   gap: 0 10px;
   width: 100%;
+  font-size: ${PRIMER_FONT_SIZE_SMALL};
 `;
 
 const WorkPackageType = styled.div<{ color: string }>`
@@ -108,7 +120,6 @@ const WorkPackageId = styled.div`
 
 const WorkPackageStatus = styled.div<{ base_color: string }>`
   ${({ base_color }) => defaultColorStyles(base_color)}
-  font-size: 0.8rem;
   border-radius: 100px;
   border: 1px solid ${() => statusBorderColor()};
   padding: 0 7px;
@@ -121,7 +132,7 @@ const WorkPackageTitle = styled.div`
   flex-basis: max-content;
   color: var(--bn-colors-editor-text);
   font-weight: 500;
-    
+
   a {
     cursor: pointer;
     text-decoration: none;
