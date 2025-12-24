@@ -1,2 +1,2 @@
-export * from "./OpenProjectWorkPackageBlock";
-export * from "./ShadowDomWrapper";
+export * from "./OpenProjectWorkPackageBlock.tsx";
+export * from "./ShadowDomWrapper.tsx";

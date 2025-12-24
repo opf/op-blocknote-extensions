@@ -11,6 +11,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/op-blocknote-extensions.es.js",
       "require": "./dist/op-blocknote-extensions.cjs.js"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.js"
     }
   },
   "files": [
@@ -36,6 +40,7 @@
     "@vitejs/plugin-react": "^5.1.0",
     "@vitest/coverage-v8": "^4.0.5",
     "eslint": "^9.38.0",
+    "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^16.4.0",

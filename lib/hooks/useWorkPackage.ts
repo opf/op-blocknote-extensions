@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import type { WorkPackage } from "../openProjectTypes";
-import { OpenProjectApiError, fetchWorkPackage } from "../services/openProjectApi";
+import { OpenProjectApiError, fetchWorkPackage } from "../services/openProjectApi.ts";
 
 export function useWorkPackage(wpid: number|undefined) {
   const [workPackage, setWorkPackage] = useState<WorkPackage | null>(null);

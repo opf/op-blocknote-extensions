@@ -1,5 +1,5 @@
 
-import type {OpenProjectResponse, StatusCollection, TypeCollection, WorkPackage} from "../openProjectTypes";
+import type {OpenProjectResponse, StatusCollection, TypeCollection, WorkPackage} from "../openProjectTypes.ts";
 
 let baseUrl = "https://openproject.local";
 

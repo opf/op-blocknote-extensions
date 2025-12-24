@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import type { WorkPackage } from "../openProjectTypes";
-import { searchWorkPackages } from "../services/openProjectApi";
+import { searchWorkPackages } from "../services/openProjectApi.ts";
 
 interface UseWorkPackageSearchOptions {
   debounce?: number;
