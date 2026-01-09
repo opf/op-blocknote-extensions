@@ -7,7 +7,7 @@ import { useWorkPackage } from "../hooks/useWorkPackage";
 import { useWorkPackageSearch } from "../hooks/useWorkPackageSearch";
 import type { WorkPackage } from "../openProjectTypes";
 import { linkToWorkPackage } from "../services/openProjectApi";
-import { defaultVariables, useColors} from "../services/colors";
+import { useColors} from "../services/colors";
 import { getAliases } from "../services/slashMenuAliases";
 import { useTranslation } from "react-i18next"; // localize react components
 import i18n from "../services/i18n.ts"; // localize other code
@@ -15,6 +15,7 @@ import i18n from "../services/i18n.ts"; // localize other code
 import { LinkIcon, SearchIcon } from "@primer/octicons-react";
 import { SPACER_S, SPACER_M, SPACER_L, SPACER_XL } from "../services/css_constants";
 import { WorkPackageElement } from "../elements/workPackageElement";
+import { UnavailableWorkPackageElement } from "../elements/unavailableWorkPackageElement";
 import styled from "styled-components";
 
 const Block = styled.div.attrs({
@@ -90,46 +91,11 @@ const DropdownOption = styled.div.attrs({
   cursor: pointer;
 `;
 
-const UnavailableWorkPackage = styled.div.attrs({
-  className: 'op-bn-work-package-placeholder'
-})`
-  ${defaultVariables}
-  padding: ${SPACER_M} ${SPACER_L};
-  background-color: var(--highlight-wp-background);
-  border-radius: var(--bn-border-radius-small);
-`;
-
-const UnavailableMessage = styled.div.attrs({
-  className: 'op-bn-unavailable-message'
-})`
-  color: var(--bn-colors-editor-text) !important;
-`
-
-const UnavailableMessageHeader = styled.div.attrs({
-  className: 'op-bn-unavailable-message--header'
-})`
-  font-weight: 600;
-  color: var(--bn-colors-editor-text) !important;
-`
-
 interface BlockProps {
   id: string,
   props: {
     wpid: string;
   };
-}
-
-const UnavailableWorkPackageElement = ({ header, message }: {header: string, message: string}) => {
-  return (
-    <UnavailableWorkPackage>
-      <UnavailableMessage>
-        <UnavailableMessageHeader>
-          { header }
-        </UnavailableMessageHeader>
-        { message }
-      </UnavailableMessage>
-    </UnavailableWorkPackage>
-  )
 }
 
 const OpenProjectWorkPackageBlockComponent = ({
