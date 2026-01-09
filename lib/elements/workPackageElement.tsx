@@ -1,3 +1,4 @@
+import type { WorkPackage } from "../openProjectTypes";
 import {
   defaultColorStyles,
   defaultVariables,
@@ -9,7 +10,7 @@ import {
   typeTextColor
 } from "../services/colors.ts";
 import styled from "styled-components";
-import { SPACER_S, SPACER_M, SPACER_L, SPACER_XL } from "../services/css_constants";
+import { SPACER_S, SPACER_M, SPACER_L} from "../services/css_constants";
 import { linkToWorkPackage } from "../services/openProjectApi";
 
 export const WorkPackageElement = ({ workPackage, inDropdown, linkTitle }: {workPackage: WorkPackage, inDropdown?: string, linkTitle?: boolean}) => {
