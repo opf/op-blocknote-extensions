@@ -91,55 +91,20 @@ const DropdownOption = styled.div.attrs({
   cursor: pointer;
 `;
 
-interface BlockProps {
-  id: string,
-  props: {
-    wpid: string;
-  };
-}
-
-const OpenProjectWorkPackageBlockComponent = ({
-  block,
-  editor,
-}: {
-  block: BlockProps;
-  editor: BlockNoteEditor<DefaultBlockSchema & { openProjectWorkPackage: ReturnType<typeof openprojectWorkPackageBlockConfig> }>;
-}) => {
+const SearchWorkPackageElement = () => {
   const { t } = useTranslation();
+  // TODO: Check if those refs are still needed when search is splitted off
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Fetch and cache colors.
-  // The hook handles triggering re-renders when data arrives.
-  useColors();
-
-  // Search mode state (API + debounce only)
   const {
     searchQuery,
     setSearchQuery,
     searchResults,
   } = useWorkPackageSearch();
 
-  const [selectedWorkPackage, setSelectedWorkPackage] = useState<WorkPackage | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [focusedResultIndex, setFocusedResultIndex] = useState(-1);
-
-  // Load saved work package if it exists
-  const workPackageResult = useWorkPackage(block.props.wpid);
-
-  // Set selected work package when loaded
-  useEffect(() => {
-    if (!workPackageResult.error && workPackageResult.workPackage) {
-      setSelectedWorkPackage(workPackageResult.workPackage);
-    }
-  }, [workPackageResult.error, workPackageResult.workPackage]);
-
-  // Autofocus search if no work package
-  useEffect(() => {
-    if (workPackageResult.error || !workPackageResult.workPackage) {
-      setTimeout(() => inputRef?.current?.focus(), 50);
-    }
-  }, [workPackageResult.error, workPackageResult.workPackage]);
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -163,21 +128,21 @@ const OpenProjectWorkPackageBlockComponent = ({
   }, []);
 
   const handleSelectWorkPackage = (workPackage: WorkPackage) => {
-    setSelectedWorkPackage(workPackage);
+    // TODO: somehow create block with WP id at last cursor position
+    //  setSelectedWorkPackage(workPackage);
     setSearchQuery("");
     setIsDropdownOpen(false);
 
     // Update block props to persist the selection
-    editor.updateBlock(block, {
-      props: {
-        ...block.props,
-        wpid: workPackage.id,
-      },
-    });
-    setNewCursorPosition(editor, block);
+    // editor.updateBlock(block, {
+    //   props: {
+    //     ...block.props,
+    //     wpid: workPackage.id,
+    //   },
+    // });
+   //  setNewCursorPosition(editor, block);
   };
 
-  // Handle keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!isDropdownOpen) {
       return;
@@ -208,67 +173,190 @@ const OpenProjectWorkPackageBlockComponent = ({
   };
 
   return (
+    <Search>
+      <SearchLabel>
+        {t("search.label")}
+        <SearchInputWrapper>
+          <SearchIconWrapper>
+            <SearchIcon size={18} />
+          </SearchIconWrapper>
+          <SearchInput
+            ref={inputRef}
+            type="custom"
+            placeholder={t("search.placeholder")}
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              if (e.target.value) {
+                setIsDropdownOpen(true);
+              }
+            }}
+            onFocus={() => {
+              if (searchResults.length > 0) {
+                setIsDropdownOpen(true);
+              }
+            }}
+            onKeyDown={handleKeyDown}
+          />
+        </SearchInputWrapper>
+      </SearchLabel>
+
+      {/* Autocomplete dropdown */}
+      {isDropdownOpen && searchResults.length > 0 && (
+        <Dropdown
+          ref={dropdownRef}
+          role="listbox"
+          aria-label={t("search.dropdownAriaLabel")}
+        >
+          {searchResults.slice(0, 5).map((wp, index) => (
+            <DropdownOption
+              key={wp.id}
+              role="option"
+              aria-selected={focusedResultIndex === index}
+              tabIndex={0}
+              selected={focusedResultIndex === index}
+              onClick={() => handleSelectWorkPackage(wp)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleSelectWorkPackage(wp);
+                }
+              }}
+              onMouseEnter={() => setFocusedResultIndex(index)}
+            >
+              <WorkPackageElement workPackage={wp} inDropdown="true" />
+            </DropdownOption>
+          ))}
+        </Dropdown>
+      )}
+    </Search>
+  )
+}
+
+interface BlockProps {
+  id: string,
+  props: {
+    wpid: string;
+  };
+}
+
+const OpenProjectWorkPackageBlockComponent = ({
+  block,
+  editor,
+}: {
+  block: BlockProps;
+  editor: BlockNoteEditor<DefaultBlockSchema & { openProjectWorkPackage: ReturnType<typeof openprojectWorkPackageBlockConfig> }>;
+}) => {
+  const { t } = useTranslation();
+  // const inputRef = useRef<HTMLInputElement>(null);
+  // const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Fetch and cache colors.
+  // The hook handles triggering re-renders when data arrives.
+  useColors();
+
+  // Search mode state (API + debounce only)
+  // const {
+  //   searchQuery,
+  //   setSearchQuery,
+  //   searchResults,
+  // } = useWorkPackageSearch();
+
+  const [selectedWorkPackage, setSelectedWorkPackage] = useState<WorkPackage | null>(null);
+  // const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  // const [focusedResultIndex, setFocusedResultIndex] = useState(-1);
+
+  // Load saved work package if it exists
+  const workPackageResult = useWorkPackage(block.props.wpid);
+
+  // Set selected work package when loaded
+  useEffect(() => {
+    if (!workPackageResult.error && workPackageResult.workPackage) {
+      setSelectedWorkPackage(workPackageResult.workPackage);
+    }
+  }, [workPackageResult.error, workPackageResult.workPackage]);
+
+  // TODO: Should be removable
+  // Autofocus search if no work package
+  // useEffect(() => {
+  //   if (workPackageResult.error || !workPackageResult.workPackage) {
+  //     setTimeout(() => inputRef?.current?.focus(), 50);
+  //   }
+  // }, [workPackageResult.error, workPackageResult.workPackage]);
+
+  // Handle click outside to close dropdown
+  // useEffect(() => {
+  //   const handleClickOutside = (event: MouseEvent) => {
+  //     const path = event.composedPath();
+
+  //     if (
+  //       dropdownRef.current &&
+  //       !path.includes(dropdownRef.current) &&
+  //       inputRef.current &&
+  //       !path.includes(inputRef.current)
+  //     ) {
+  //       setIsDropdownOpen(false);
+  //     }
+  //   };
+
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, []);
+
+  // TODO: Can this be removed after the split?!
+  const handleSelectWorkPackage = (workPackage: WorkPackage) => {
+    setSelectedWorkPackage(workPackage);
+    // setSearchQuery("");
+    // setIsDropdownOpen(false);
+
+    // Update block props to persist the selection
+    editor.updateBlock(block, {
+      props: {
+        ...block.props,
+        wpid: workPackage.id,
+      },
+    });
+    setNewCursorPosition(editor, block);
+  };
+
+  // Handle keyboard navigation
+  // const handleKeyDown = (e: React.KeyboardEvent) => {
+  //   if (!isDropdownOpen) {
+  //     return;
+  //   }
+
+  //   switch (e.key) {
+  //     case "ArrowDown":
+  //       e.preventDefault();
+  //       setFocusedResultIndex((prev) => (prev < searchResults.length - 1 ? prev + 1 : prev));
+  //       break;
+  //     case "ArrowUp":
+  //       e.preventDefault();
+  //       setFocusedResultIndex((prev) => (prev > 0 ? prev - 1 : 0));
+  //       break;
+  //     case "Enter":
+  //       e.preventDefault();
+  //       if (focusedResultIndex >= 0 && focusedResultIndex < searchResults.length) {
+  //         handleSelectWorkPackage(searchResults[focusedResultIndex]);
+  //       }
+  //       break;
+  //     case "Escape":
+  //       e.preventDefault();
+  //       setIsDropdownOpen(false);
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  // };
+
+  return (
     <Block>
       <div>
         {/* Show search dialog if no work package is selected yet */}
         {!block.props.wpid && (
-          <Search>
-            <SearchLabel>
-              {t("search.label")}
-              <SearchInputWrapper>
-                <SearchIconWrapper>
-                  <SearchIcon size={18} />
-                </SearchIconWrapper>
-                <SearchInput
-                  ref={inputRef}
-                  type="custom"
-                  placeholder={t("search.placeholder")}
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    if (e.target.value) {
-                      setIsDropdownOpen(true);
-                    }
-                  }}
-                  onFocus={() => {
-                    if (searchResults.length > 0) {
-                      setIsDropdownOpen(true);
-                    }
-                  }}
-                  onKeyDown={handleKeyDown}
-                />
-              </SearchInputWrapper>
-            </SearchLabel>
-
-            {/* Autocomplete dropdown */}
-            {isDropdownOpen && searchResults.length > 0 && (
-              <Dropdown
-                ref={dropdownRef}
-                role="listbox"
-                aria-label={t("search.dropdownAriaLabel")}
-              >
-                {searchResults.slice(0, 5).map((wp, index) => (
-                  <DropdownOption
-                    key={wp.id}
-                    role="option"
-                    aria-selected={focusedResultIndex === index}
-                    tabIndex={0}
-                    selected={focusedResultIndex === index}
-                    onClick={() => handleSelectWorkPackage(wp)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        handleSelectWorkPackage(wp);
-                      }
-                    }}
-                    onMouseEnter={() => setFocusedResultIndex(index)}
-                  >
-                    <WorkPackageElement workPackage={wp} inDropdown="true" />
-                  </DropdownOption>
-                ))}
-              </Dropdown>
-            )}
-          </Search>
+          <SearchWorkPackageElement />
         )}
 
         {/* Show work package data (if available) */}
@@ -333,6 +421,15 @@ export const openProjectWorkPackageSlashMenu = (editor: any) => ({
   icon: <LinkIcon size={18} />,
   subtext: i18n.t("slashMenu.subtext"),
 })
+
+function searchDialog(editor: BlockNoteEditor<any>) {
+
+
+}
+
+//function showWorkPackageDialog(editor: BlockNoteEditor<any>) {
+//  editor.domElement.after(searchDialog(editor));
+//}
 
 // The link work package block is not editable, so the cursor should be
 // positioned at the beginning of the next block.
