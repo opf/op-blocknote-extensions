@@ -248,19 +248,10 @@ const OpenProjectWorkPackageBlockComponent = ({
   editor: BlockNoteEditor<DefaultBlockSchema & { openProjectWorkPackage: ReturnType<typeof openprojectWorkPackageBlockConfig> }>;
 }) => {
   const { t } = useTranslation();
-  // const inputRef = useRef<HTMLInputElement>(null);
-  // const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Fetch and cache colors.
   // The hook handles triggering re-renders when data arrives.
   useColors();
-
-  // Search mode state (API + debounce only)
-  // const {
-  //   searchQuery,
-  //   setSearchQuery,
-  //   searchResults,
-  // } = useWorkPackageSearch();
 
   const [selectedWorkPackage, setSelectedWorkPackage] = useState<WorkPackage | null>(null);
   // const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -284,27 +275,6 @@ const OpenProjectWorkPackageBlockComponent = ({
   //   }
   // }, [workPackageResult.error, workPackageResult.workPackage]);
 
-  // Handle click outside to close dropdown
-  // useEffect(() => {
-  //   const handleClickOutside = (event: MouseEvent) => {
-  //     const path = event.composedPath();
-
-  //     if (
-  //       dropdownRef.current &&
-  //       !path.includes(dropdownRef.current) &&
-  //       inputRef.current &&
-  //       !path.includes(inputRef.current)
-  //     ) {
-  //       setIsDropdownOpen(false);
-  //     }
-  //   };
-
-  //   document.addEventListener("mousedown", handleClickOutside);
-  //   return () => {
-  //     document.removeEventListener("mousedown", handleClickOutside);
-  //   };
-  // }, []);
-
   // TODO: Can this be removed after the split?!
   const handleSelectWorkPackage = (workPackage: WorkPackage) => {
     setSelectedWorkPackage(workPackage);
@@ -320,36 +290,6 @@ const OpenProjectWorkPackageBlockComponent = ({
     });
     setNewCursorPosition(editor, block);
   };
-
-  // Handle keyboard navigation
-  // const handleKeyDown = (e: React.KeyboardEvent) => {
-  //   if (!isDropdownOpen) {
-  //     return;
-  //   }
-
-  //   switch (e.key) {
-  //     case "ArrowDown":
-  //       e.preventDefault();
-  //       setFocusedResultIndex((prev) => (prev < searchResults.length - 1 ? prev + 1 : prev));
-  //       break;
-  //     case "ArrowUp":
-  //       e.preventDefault();
-  //       setFocusedResultIndex((prev) => (prev > 0 ? prev - 1 : 0));
-  //       break;
-  //     case "Enter":
-  //       e.preventDefault();
-  //       if (focusedResultIndex >= 0 && focusedResultIndex < searchResults.length) {
-  //         handleSelectWorkPackage(searchResults[focusedResultIndex]);
-  //       }
-  //       break;
-  //     case "Escape":
-  //       e.preventDefault();
-  //       setIsDropdownOpen(false);
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // };
 
   return (
     <Block>
