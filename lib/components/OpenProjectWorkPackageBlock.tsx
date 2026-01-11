@@ -92,7 +92,20 @@ const DropdownOption = styled.div.attrs({
   cursor: pointer;
 `;
 
-const SearchWorkPackageElement = () => {
+function insertWorkPackageBlock(editor: BlockNoteEditor<any>, workPackage: WorkPackage) {
+  const cursorPosition = editor.getTextCursorPosition();
+  editor.insertBlocks(
+    [{
+      type: "openProjectWorkPackage",
+      props: {wpid: workPackage.id}
+    }],
+    cursorPosition.block?.id,
+    "after",
+  )
+  // TODO: Set cursor to after inserted block
+}
+
+const SearchWorkPackageElement = ({ editor }: {editor: BlockNoteEditor<any>}) => {
   const { t } = useTranslation();
   // TODO: Check if those refs are still needed when search is splitted off
   const inputRef = useRef<HTMLInputElement>(null);
@@ -129,19 +142,10 @@ const SearchWorkPackageElement = () => {
   }, []);
 
   const handleSelectWorkPackage = (workPackage: WorkPackage) => {
-    // TODO: somehow create block with WP id at last cursor position
-    //  setSelectedWorkPackage(workPackage);
     setSearchQuery("");
     setIsDropdownOpen(false);
-
-    // Update block props to persist the selection
-    // editor.updateBlock(block, {
-    //   props: {
-    //     ...block.props,
-    //     wpid: workPackage.id,
-    //   },
-    // });
-   //  setNewCursorPosition(editor, block);
+    insertWorkPackageBlock(editor, workPackage);
+    // TODO: Remove dialog from DOM
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -276,22 +280,6 @@ const OpenProjectWorkPackageBlockComponent = ({
   //   }
   // }, [workPackageResult.error, workPackageResult.workPackage]);
 
-  // TODO: Can this be removed after the split?!
-  const handleSelectWorkPackage = (workPackage: WorkPackage) => {
-    setSelectedWorkPackage(workPackage);
-    // setSearchQuery("");
-    // setIsDropdownOpen(false);
-
-    // Update block props to persist the selection
-    editor.updateBlock(block, {
-      props: {
-        ...block.props,
-        wpid: workPackage.id,
-      },
-    });
-    setNewCursorPosition(editor, block);
-  };
-
   return (
     <Block>
       <div>
@@ -362,7 +350,7 @@ function showWorkPackageDialog(editor: BlockNoteEditor<any>) {
   container.className = "op-bn-search-dialog-container";
   editor.domElement.after(container);
   const root = createRoot(container);
-  root.render(<SearchWorkPackageElement />);
+  root.render(<SearchWorkPackageElement editor={editor} />);
 }
 
 // The link work package block is not editable, so the cursor should be
