@@ -3,6 +3,7 @@ import { BlockNoteEditor, createBlockConfig, createBlockSpec } from "@blocknote/
 import { insertOrUpdateBlockForSlashMenu } from "@blocknote/core/extensions";
 import { createReactBlockSpec } from "@blocknote/react";
 import React, { useEffect, useRef, useState } from "react";
+import { createRoot } from "react-dom/client";
 import { useWorkPackage } from "../hooks/useWorkPackage";
 import { useWorkPackageSearch } from "../hooks/useWorkPackageSearch";
 import type { WorkPackage } from "../openProjectTypes";
@@ -294,12 +295,6 @@ const OpenProjectWorkPackageBlockComponent = ({
   return (
     <Block>
       <div>
-        {/* Show search dialog if no work package is selected yet */}
-        {!block.props.wpid && (
-          <SearchWorkPackageElement />
-        )}
-
-        {/* Show work package data (if available) */}
         {block.props.wpid && !selectedWorkPackage && workPackageResult.loading && (
           <UnavailableWorkPackageElement header={t("unavailableWorkPackage.loading.header")} message={t("unavailableWorkPackage.loading.message")} />
         )}
@@ -355,21 +350,20 @@ export const openProjectWorkPackageStaticBlockSpec = createBlockSpec(
 
 export const openProjectWorkPackageSlashMenu = (editor: any) => ({
   title: i18n.t("slashMenu.title"),
-  onItemClick: () => insertOrUpdateBlockForSlashMenu(editor, { type: "openProjectWorkPackage" }),
+  onItemClick: () => showWorkPackageDialog(editor), // insertOrUpdateBlockForSlashMenu(editor, { type: "openProjectWorkPackage" }),
   aliases: [...getAliases()],
   group: "OpenProject",
   icon: <LinkIcon size={18} />,
   subtext: i18n.t("slashMenu.subtext"),
 })
 
-function searchDialog(editor: BlockNoteEditor<any>) {
-
-
+function showWorkPackageDialog(editor: BlockNoteEditor<any>) {
+  const container = document.createElement("div");
+  container.className = "op-bn-search-dialog-container";
+  editor.domElement.after(container);
+  const root = createRoot(container);
+  root.render(<SearchWorkPackageElement />);
 }
-
-//function showWorkPackageDialog(editor: BlockNoteEditor<any>) {
-//  editor.domElement.after(searchDialog(editor));
-//}
 
 // The link work package block is not editable, so the cursor should be
 // positioned at the beginning of the next block.
