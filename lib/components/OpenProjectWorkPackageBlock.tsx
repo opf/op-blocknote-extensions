@@ -31,7 +31,10 @@ const Block = styled.div.attrs({
 const Search = styled.div.attrs({
   className: 'op-bn-search'
 })`
-  position: relative;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   padding: ${SPACER_M} ${SPACER_XL};
   box-shadow: var(--bn-shadow-medium);
   border-radius: var(--bn-border-radius-large);
@@ -111,6 +114,10 @@ const SearchWorkPackageElement = ({ editor }: {editor: BlockNoteEditor<any>}) =>
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // Fetch and cache colors.
+  // The hook handles triggering re-renders when data arrives.
+  useColors();
+
   const {
     searchQuery,
     setSearchQuery,
@@ -145,6 +152,7 @@ const SearchWorkPackageElement = ({ editor }: {editor: BlockNoteEditor<any>}) =>
     setSearchQuery("");
     setIsDropdownOpen(false);
     insertWorkPackageBlock(editor, workPackage);
+    editor.focus();
     // TODO: Remove dialog from DOM
   };
 
