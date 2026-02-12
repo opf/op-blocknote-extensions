@@ -15,13 +15,7 @@ import { linkToWorkPackage } from "../services/openProjectApi";
 export const WorkPackageElement = ({ workPackage, inDropdown, linkTitle }: {workPackage: WorkPackage, inDropdown?: string, linkTitle?: boolean}) => {
   let title = undefined
   if(linkTitle ?? false) {
-    title = <a
-      href={linkToWorkPackage(workPackage.id)}
-      onClick={(event) => {
-        event.stopPropagation();
-        window.open(linkToWorkPackage(workPackage.id), '_blank', 'noopener,noreferrer');
-      }}
-    >
+    title = <a href={linkToWorkPackage(workPackage.id)} target="_blank" rel="noopener noreferrer">
       {workPackage.subject}
     </a>
   } else {
