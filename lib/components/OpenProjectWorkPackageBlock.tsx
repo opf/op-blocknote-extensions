@@ -67,7 +67,7 @@ const SearchIconWrapper = styled.div.attrs({
 const SearchInput = styled.input.attrs({ className: "op-bn-search--input" })`
   width: 100%;
   padding: var(--spacer-m) var(--spacer-l);
-  padding-left: 35px !important; // ⚠️ Hardcoded padding for icon
+  padding-left: 30px !important; // Hardcoded padding for icon
   border: 1px solid var(--bn-colors-border);
   border-radius: var(--bn-border-radius-small);
   background: var(--bn-colors-editor-background);
@@ -117,7 +117,7 @@ const OpenProjectWorkPackageBlockComponent = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useColors();
+  useColors(); // hook for syncing colors with editor
 
   const { searchQuery, setSearchQuery, searchResults } = useWorkPackageSearch();
   const [selectedWorkPackage, setSelectedWorkPackage] =
