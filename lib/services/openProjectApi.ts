@@ -34,7 +34,8 @@ async function get<T>(endpoint: string): Promise<T> {
 
 export function linkToWorkPackage(id: number): string {
   if (isNaN(id) || id <= 0) {
-    throw new OpenProjectApiError(`Invalid work package ID: ${id}`);
+    console.warn(`Invalid work package ID: ${id}`);
+    return `${baseUrl}`;
   }
   return `${baseUrl}/wp/${id}`;
 }
