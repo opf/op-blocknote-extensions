@@ -9,6 +9,7 @@ import {
   useCreateBlockNote,
 } from "@blocknote/react";
 import {
+  ErrorBoundary,
   initializeOpBlockNoteExtensions,
   openProjectWorkPackageBlockSpec,
   openProjectWorkPackageSlashMenu,
@@ -22,7 +23,7 @@ const schema = BlockNoteSchema.create().extend({
 });
 type EditorType = typeof schema.BlockNoteEditor;
 
-export default function App() {
+function AppInner() {
   const editor = useCreateBlockNote({
     schema,
   });
@@ -48,5 +49,13 @@ export default function App() {
         }
       />
     </BlockNoteView>
+  );
+}
+
+export default function App() {
+  return (
+    <ErrorBoundary>
+      <AppInner />
+    </ErrorBoundary>
   );
 }
