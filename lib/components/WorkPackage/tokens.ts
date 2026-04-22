@@ -1,11 +1,11 @@
 export const CHIP_STYLES = {
-  bg: "var(--bn-colors-highlights-gray-background)",
+  bg: "var(--op-chip-bg)",
   radius: "var(--bn-border-radius)",
   gap: "6px",
   padding: {
-    xxs: "2px 8px",
-    xs: "8px",
-    s: "8px",
+    xxs: "5px",
+    xs: "3px 6px",
+    s: "3px 6px",
   },
 
   fontSize: "12px",

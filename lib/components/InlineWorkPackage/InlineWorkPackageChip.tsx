@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { useWorkPackage } from "../../hooks/useWorkPackage";
-import { useColors } from "../../services/colors";
 import { CHIP_STYLES } from "../WorkPackage/tokens";
 import { ChipBase } from "./chipLayouts";
 import { WorkPackageId } from "../WorkPackage/atoms";
@@ -12,30 +11,36 @@ import { getPendingCallbacks, clearInlineWpCallbacks } from "./callbacks";
 import type { InlineWpSize } from "../WorkPackage/types";
 import { wpBridge } from "../../services/wpBridge";
 import { BlockCard } from "../BlockWorkPackage/BlockCard";
-
+import { defaultWpVariables } from "../WorkPackage/atoms";
 interface InlineWorkPackageChipProps {
   inlineContent: { props: { wpid: string; size: string; instanceId: string } };
   contentRef: (node: HTMLElement | null) => void;
+  editor?: any;
 }
 
-const InlineChip = styled.span.attrs({
-  className: "op-bn-inline-wp",
-  contentEditable: false,
-})<{ selected?: boolean }>`
+const InlineChip = styled.span<{ selected?: boolean; $inSelection?: boolean }>`
+  ${defaultWpVariables}
+
   display: inline-flex;
   align-items: center;
+  height: 24px;
+  max-height: 24px;
   vertical-align: middle;
+  line-height: 1;
   cursor: pointer;
   user-select: none;
   border-radius: ${CHIP_STYLES.radius};
-  outline: ${({ selected }) => (selected ? CHIP_STYLES.focusOutline : "none")};
+  background-color: var(--op-chip-bg);
+
+  outline: ${({ selected, $inSelection }) => selected || $inSelection ? `${CHIP_STYLES.focusOutline} !important` : "none !important"};
   outline-offset: 1px;
+
   box-shadow: ${({ selected }) => (selected ? CHIP_STYLES.focusShadow : "none")};
   position: relative;
   max-width: 100%;
 `;
 
-export const InlineWorkPackageChip = ({ inlineContent, contentRef }: InlineWorkPackageChipProps) => {
+export const InlineWorkPackageChip = ({ inlineContent, contentRef, editor }: InlineWorkPackageChipProps) => {
   const rawWpid = inlineContent.props.wpid;
   const size = (inlineContent.props.size ?? "s") as InlineWpSize;
   const instanceId = inlineContent.props.instanceId;
@@ -43,11 +48,10 @@ export const InlineWorkPackageChip = ({ inlineContent, contentRef }: InlineWorkP
   const pendingCallbacks = getPendingCallbacks(rawWpid);
   const wpid = pendingCallbacks === undefined && rawWpid ? Number(rawWpid) : undefined;
 
-  useColors();
-
   const { workPackage: wp, loading } = useWorkPackage(wpid);
 
   const [isSelected, setIsSelected] = useState(false);
+  const [inSelection, setInSelection] = useState(false);
   const chipRef = useRef<HTMLElement | null>(null);
 
   const setRef = (node: HTMLElement | null) => {
@@ -66,6 +70,40 @@ export const InlineWorkPackageChip = ({ inlineContent, contentRef }: InlineWorkP
     document.addEventListener("mousedown", onClickOutside);
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, [isSelected]);
+
+  useEffect(() => {
+    const tiptap = (editor as any)?._tiptapEditor;
+    if (!tiptap) return;
+
+    const onSelectionUpdate = () => {
+      const chip = chipRef.current;
+      if (!chip) {
+        setInSelection(false);
+        return;
+      }
+
+      const { selection } = tiptap.state;
+
+      if (selection.empty) {
+        setInSelection(false);
+        return;
+      }
+
+      try {
+        const domPos = tiptap.view.posAtDOM(chip, 0);
+        if (domPos == null || domPos < 0) {
+          setInSelection(false);
+          return;
+        }
+        setInSelection(domPos >= selection.from && domPos <= selection.to);
+      } catch {
+        setInSelection(false);
+      }
+    };
+
+    tiptap.on("selectionUpdate", onSelectionUpdate);
+    return () => tiptap.off("selectionUpdate", onSelectionUpdate);
+  }, [editor, wpid]);
 
   // Pending: waiting for user to pick a WP via search
   if (pendingCallbacks) {
@@ -105,9 +143,11 @@ export const InlineWorkPackageChip = ({ inlineContent, contentRef }: InlineWorkP
         aria-label={`Work package #${wpid}`}
         ref={setRef}
         selected={isSelected}
+        $inSelection={inSelection}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
+          if (window.getSelection()?.toString()) return;
           setIsSelected((prev) => !prev);
         }}
       >

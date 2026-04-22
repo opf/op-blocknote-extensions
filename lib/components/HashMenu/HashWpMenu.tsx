@@ -1,4 +1,5 @@
 import type { FC, RefObject } from "react";
+import { useRef } from "react";
 import type { SuggestionMenuProps } from "@blocknote/react";
 import styled from "styled-components";
 import { BlockCard } from "../BlockWorkPackage/BlockCard";
@@ -6,11 +7,10 @@ import { defaultWpVariables } from "../WorkPackage/atoms";
 import type { WorkPackage } from "../../openProjectTypes";
 import type { HashMenuItem } from "./types";
 import type { AnyEditor } from "./editorUtils";
+import type { InlineWpSize } from "../WorkPackage/types";
 import {
   getSizeFromCurrentBlock,
-  clearTriggerText,
   insertWpChip,
-  insertWpChipIntoBlock,
 } from "./editorUtils";
 
 const Menu = styled.div.attrs({ className: "op-bn-hash-menu" })`
@@ -26,12 +26,12 @@ const Menu = styled.div.attrs({ className: "op-bn-hash-menu" })`
 const MenuItem = styled.div<{ $selected: boolean }>`
   border-radius: var(--bn-border-radius-small);
   background: ${({ $selected }) =>
-    $selected ? "var(--bn-colors-highlights-gray-background, #f0f0f0)" : "transparent"};
+    $selected ? "var(--op-item-hover-bg)" : "transparent"};
   cursor: pointer;
   padding: 0 var(--spacer-s);
 
   &:hover {
-    background: var(--bn-colors-highlights-gray-background, #f0f0f0);
+    background: var(--op-item-hover-bg);
   }
 `;
 
@@ -54,27 +54,48 @@ export function createHashWpMenuComponent(
     const searchQuery = items[0]?.title ?? "";
     const visibleResults = (resultsRef.current ?? []).slice(0, MAX_RESULTS);
 
+    const pendingSizeRef = useRef<InlineWpSize>("xxs");
+    const originalBlockIdRef = useRef<string | undefined>(undefined);
+    const savedSelectionRef = useRef<any>(null);
+
+    const currentSize = getSizeFromCurrentBlock(editor);
+    const currentBlockId = editor.getTextCursorPosition()?.block?.id;
+
     // Mutate each item's onItemClick so BlockNote's keyboard handler
     // (Enter / PgUp / PgDn) calls the correct insertion for that result.
     visibleResults.forEach((wp, index) => {
       if (!items[index]) return;
 
-      const size = getSizeFromCurrentBlock(editor);
-      const blockId = editor.getTextCursorPosition()?.block?.id;
-
       items[index].onItemClick = () => {
+        const size = pendingSizeRef.current !== "xxs"
+          ? pendingSizeRef.current
+          : currentSize;
+        const originalBlockId = originalBlockIdRef.current ?? currentBlockId;
+        const savedSelection = savedSelectionRef.current;
+
+        pendingSizeRef.current = "xxs";
+        originalBlockIdRef.current = undefined;
+        savedSelectionRef.current = null;
+
         requestAnimationFrame(() => {
-          if (!blockId) return;
+          if (!originalBlockId) return;
           editor.focus();
 
           // BlockNote splits the block on Enter - remove the new empty block it created.
           const currentBlock = editor.getTextCursorPosition()?.block;
-          if (currentBlock && currentBlock.id !== blockId) {
+          if (currentBlock && currentBlock.id !== originalBlockId) {
             editor.removeBlocks([currentBlock.id]);
           }
 
-          clearTriggerText(editor);
-          insertWpChipIntoBlock(editor, blockId, wp, size);
+          if (savedSelection) {
+            const tiptap = (editor as any)._tiptapEditor;
+            if (tiptap) {
+              const tr = tiptap.state.tr.setSelection(savedSelection);
+              tiptap.view.dispatch(tr);
+            }
+          }
+
+          insertWpChip(editor, wp, size);
         });
       };
     });
@@ -105,13 +126,10 @@ export function createHashWpMenuComponent(
             // cleanup, so we clear the trigger text manually before inserting.
             onMouseDown={(e) => {
               e.preventDefault();
-              const size = getSizeFromCurrentBlock(editor);
-              const blockId = clearTriggerText(editor);
-              if (blockId) {
-                editor.focus();
-                editor.setTextCursorPosition(blockId, "end");
-              }
-              insertWpChip(editor, wp, size);
+              pendingSizeRef.current = getSizeFromCurrentBlock(editor);
+              originalBlockIdRef.current = editor.getTextCursorPosition()?.block?.id;
+              savedSelectionRef.current = (editor as any)._tiptapEditor?.state?.selection ?? null;
+              items[index]?.onItemClick();
             }}
           >
             <BlockCard workPackage={wp} inDropdown />
