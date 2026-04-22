@@ -80,8 +80,8 @@ function makeFakeEditor(content: FakeContent = []) {
     updateBlock: (id: string, update: { content: FakeContent }) => {
       if (id === block.id) block.content = update.content;
     },
-    insertInlineContent: (c: FakeContent) => {
-      inserted.push(...c);
+    insertInlineContent: (content: FakeContent) => {
+      inserted.push(...content);
     },
     focus: vi.fn(),
     setTextCursorPosition: vi.fn(),
