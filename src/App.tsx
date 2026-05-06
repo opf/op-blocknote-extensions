@@ -15,8 +15,7 @@ import {
   openProjectWorkPackageInlineSpec,
   workPackageSlashMenu,
   useHashWpMenu,
-  useDeduplicateInstanceIds,
-  useInlineWpEvents
+  useOpBlockNoteExtensions
 } from "../lib";
 import "./fetchOverride";
 import type { HashMenuItem } from "../lib";
@@ -47,8 +46,7 @@ function buildSlashMenuItems(editor: EditorType) {
 export default function App() {
   const editor = useCreateBlockNote({ schema });
 
-  useInlineWpEvents(editor as any);
-  useDeduplicateInstanceIds(editor as any);
+  useOpBlockNoteExtensions(editor as any);
 
   const getSlashItems = useCallback(
     async (query: string) => filterSuggestionItems(buildSlashMenuItems(editor), query),
