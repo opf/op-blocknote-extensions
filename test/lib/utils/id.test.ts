@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { makeInstanceId } from "../../../lib/services/utils";
+import { makeInstanceId } from "../../../lib/utils/id.ts";
 
 describe("makeInstanceId", () => {
   it("returns a non-empty string", () => {
