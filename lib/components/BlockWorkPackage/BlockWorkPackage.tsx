@@ -17,6 +17,13 @@ import { defaultWpVariables } from "../WorkPackage/atoms";
 const Block = styled.div.attrs({ className: "op-bn-extensions" })`
   ${defaultWpVariables}
   background-color: var(--op-chip-bg);
+  
+  user-select: all; 
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
 `;
 
 const BlockCardWrapper = styled.div`
@@ -31,6 +38,22 @@ interface BlockProps {
     initialized?: boolean;
     size?: BlockWpSize;
   };
+}
+
+// Looks up the SideMenu extension on the editor instance without using
+// `useExtension(SideMenuExtension, ...)`, which fails with "Extension not found"
+// when `@blocknote/core` is duplicated in node_modules — happens in op-app
+// where the host has its own @blocknote/core copy that doesn't share class
+// identity with the one this lib was built against.
+function getSideMenuExtension(editor: BlockNoteEditor<any>): any {
+  const extensions = (editor as any).extensions;
+  if (!extensions) return null;
+
+  if (extensions instanceof Map) {
+    return extensions.get("sideMenu") ?? null;
+  }
+
+  return extensions.sideMenu ?? extensions.SideMenu ?? null;
 }
 
 export const BlockWorkPackageComponent = ({
@@ -59,6 +82,15 @@ export const BlockWorkPackageComponent = ({
       props: { ...block.props, wpid: wp.id, initialized: true },
     });
     requestAnimationFrame(() => moveCursorToNextBlock(editor, block.id));
+  };
+
+  // Delegate the drag to the same mechanism the side menu uses internally,
+  // so dragging the block directly behaves identically to dragging via the handle.
+  const handleBlockDragStart = (e: React.DragEvent) => {
+    const sideMenu = getSideMenuExtension(editor);
+    if (sideMenu && typeof sideMenu.blockDragStart === "function") {
+      sideMenu.blockDragStart(e.nativeEvent, block as any);
+    }
   };
 
   useEffect(() => {
@@ -136,6 +168,8 @@ export const BlockWorkPackageComponent = ({
     <Block
       tabIndex={disableFocus ? -1 : 0}
       style={disableFocus ? { pointerEvents: "none" } : undefined}
+      draggable="true"
+      onDragStart={handleBlockDragStart}
     >
       <div contentEditable={false} style={{ userSelect: "none" }}>
         {!block.props.wpid && !block.props.initialized && isActive && (
