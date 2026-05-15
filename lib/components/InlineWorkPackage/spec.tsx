@@ -1,5 +1,6 @@
 import { createReactInlineContentSpec } from "@blocknote/react";
 import { InlineWorkPackageChip } from "./InlineWorkPackageChip";
+import { linkToWorkPackage } from "../../services/openProjectApi";
 
 export const openProjectWorkPackageInlineSpec = createReactInlineContentSpec(
   {
@@ -19,15 +20,18 @@ export const openProjectWorkPackageInlineSpec = createReactInlineContentSpec(
     toExternalHTML: ({ inlineContent }) => {
       const { wpid, instanceId, size } = inlineContent.props;
       if (!wpid || wpid.startsWith("pending:")) return <></>;
+      const numericWpid = Number(wpid);
+      if (!Number.isFinite(numericWpid) || numericWpid <= 0) return <></>;
       return (
-        <span
+        <a
+          href={linkToWorkPackage(numericWpid)}
           data-inline-content-type="openProjectWorkPackageInline"
           data-wpid={wpid}
           data-instance-id={instanceId}
           data-size={size}
         >
           #{wpid}
-        </span>
+        </a>
       );
     },
 
