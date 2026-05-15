@@ -1,6 +1,7 @@
 import { createBlockConfig } from "@blocknote/core";
 import { createReactBlockSpec } from "@blocknote/react";
 import { BlockWorkPackageComponent } from "./BlockWorkPackage";
+import { linkToWorkPackage } from "../../services/openProjectApi";
 
 export const blockConfig = createBlockConfig((() => ({
   type: "openProjectWorkPackageBlock" as const,
@@ -25,16 +26,17 @@ export const openProjectWorkPackageBlockSpec = createReactBlockSpec(
 
     toExternalHTML: ({ block }) => {
       const { wpid, size, initialized } = block.props;
-      if (!wpid) return <></>;
+      if (!wpid || wpid <= 0) return <></>;
       return (
-        <div
+        <a
+          href={linkToWorkPackage(wpid)}
           data-block-content-type="openProjectWorkPackageBlock"
           data-wpid={String(wpid)}
           data-size={size ?? "m"}
           data-initialized={String(initialized ?? true)}
         >
           #{wpid}
-        </div>
+        </a>
       );
     },
 
