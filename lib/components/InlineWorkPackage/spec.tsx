@@ -1,6 +1,7 @@
 import { createReactInlineContentSpec } from "@blocknote/react";
 import { InlineWorkPackageChip } from "./InlineWorkPackageChip";
 import { linkToWorkPackage } from "../../services/openProjectApi";
+import { hashesForSize } from "../WorkPackage/types";
 
 export const openProjectWorkPackageInlineSpec = createReactInlineContentSpec(
   {
@@ -30,7 +31,7 @@ export const openProjectWorkPackageInlineSpec = createReactInlineContentSpec(
           data-instance-id={instanceId}
           data-size={size}
         >
-          #{wpid}
+          {hashesForSize(size)}{wpid}
         </a>
       );
     },

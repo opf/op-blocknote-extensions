@@ -40,7 +40,16 @@ describe("openProjectWorkPackageBlockSpec toExternalHTML", () => {
     expect(anchor!.getAttribute("data-block-content-type")).toBe("openProjectWorkPackageBlock");
     expect(anchor!.getAttribute("data-wpid")).toBe("123");
     expect(anchor!.getAttribute("data-size")).toBe("m");
-    expect(anchor!.textContent).toBe("#123");
+    expect(anchor!.textContent).toBe("###123");
+  });
+
+  it("uses three hashes for any block size (m / l / xl)", () => {
+    initOpenProjectApi({ baseUrl: "https://example.com" });
+
+    for (const size of ["m", "l", "xl"]) {
+      const dom = renderExternalHTML({ wpid: 7, size, initialized: true });
+      expect(dom.querySelector("a")!.textContent).toBe("###7");
+    }
   });
 
   it("respects the configured baseUrl", () => {

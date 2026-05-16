@@ -2,6 +2,7 @@ import { createBlockConfig } from "@blocknote/core";
 import { createReactBlockSpec } from "@blocknote/react";
 import { BlockWorkPackageComponent } from "./BlockWorkPackage";
 import { linkToWorkPackage } from "../../services/openProjectApi";
+import { hashesForSize } from "../WorkPackage/types";
 
 export const blockConfig = createBlockConfig((() => ({
   type: "openProjectWorkPackageBlock" as const,
@@ -35,7 +36,7 @@ export const openProjectWorkPackageBlockSpec = createReactBlockSpec(
           data-size={size ?? "m"}
           data-initialized={String(initialized ?? true)}
         >
-          #{wpid}
+          {hashesForSize(size)}{wpid}
         </a>
       );
     },
