@@ -210,7 +210,7 @@ function getTheme(): OpColorMode {
 }
 
 function detectTheme(): OpColorMode {
-  const detected = document.querySelector('.bn-container')?.getAttribute('data-color-scheme');
+  const detected = document.querySelector('.bn-root')?.getAttribute('data-color-scheme');
 
   if (detected === "light" || detected === "dark") {
     return detected;
