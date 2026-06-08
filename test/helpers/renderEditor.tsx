@@ -9,7 +9,7 @@ import {
   openProjectWorkPackageInlineSpec,
   workPackageSlashMenu,
   useHashWpMenu,
-  useOpBlockNoteExtensions,
+  useOpBlockNote,
 } from '../../lib';
 import type { HashMenuItem } from '../../lib';
 
@@ -26,8 +26,7 @@ const schema = BlockNoteSchema.create().extend({
 });
 
 function Editor() {
-  const editor = useCreateBlockNote({ schema });
-  useOpBlockNoteExtensions(editor as any); 
+  const editor = useOpBlockNote({ schema });
 
   const { getHashItems, HashWpMenu } = useHashWpMenu(editor as any);
 

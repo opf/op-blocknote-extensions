@@ -7,7 +7,6 @@ import "@blocknote/mantine/style.css";
 import {
   getDefaultReactSlashMenuItems,
   SuggestionMenuController,
-  useCreateBlockNote,
 } from "@blocknote/react";
 import {
   initializeOpBlockNoteExtensions,
@@ -15,7 +14,7 @@ import {
   openProjectWorkPackageInlineSpec,
   workPackageSlashMenu,
   useHashWpMenu,
-  useOpBlockNoteExtensions
+  useOpBlockNote
 } from "../lib";
 import "./fetchOverride";
 
@@ -43,9 +42,7 @@ function buildSlashMenuItems(editor: EditorType) {
 }
 
 export default function App() {
-  const editor = useCreateBlockNote({ schema });
-
-  useOpBlockNoteExtensions(editor as any);
+  const editor = useOpBlockNote({ schema });  
 
   const getSlashItems = useCallback(
     async (query: string) => filterSuggestionItems(buildSlashMenuItems(editor), query),

@@ -14,5 +14,4 @@ export { createHashWpMenuComponent, isHashWpQuery, useHashWpMenu } from "./compo
 export type { HashMenuItem } from "./components/HashMenu";
 export { useWorkPackageSearch } from "./hooks/useWorkPackageSearch";
 export type { WorkPackage } from "./openProjectTypes";
-export { useOpBlockNoteExtensions } from './hooks/useOpBlockNoteExtensions';
-export { DeduplicateInstanceIdsExtension } from './plugins/pasteDeduplicatePlugin';
+export { useOpBlockNote } from './hooks/useOpBlockNote';
