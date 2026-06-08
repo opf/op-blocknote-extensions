@@ -2,6 +2,7 @@ import { Plugin, PluginKey } from "prosemirror-state";
 import { Fragment, Slice } from "prosemirror-model";
 import type { Node } from "prosemirror-model";
 import { makeInstanceId } from "../utils/id";
+import { createExtension } from '@blocknote/core';
 
 /**
  * Regenerates instanceId for every inline WP chip in pasted content.
@@ -52,3 +53,8 @@ function transformFragment(fragment: Fragment): Fragment {
 
   return Fragment.fromArray(nodes);
 }
+
+export const DeduplicateInstanceIdsExtension = createExtension({
+  key: 'opDeduplicateInstanceIds',
+  prosemirrorPlugins: [pasteDeduplicatePlugin],
+});
