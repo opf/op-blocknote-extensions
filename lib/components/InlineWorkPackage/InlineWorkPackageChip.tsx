@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useWorkPackage } from '../../hooks/useWorkPackage';
 import { useColors } from '../../services/colors';
@@ -17,6 +17,12 @@ import { useTranslation } from 'react-i18next';
 import { defaultWpVariables } from '../WorkPackage/atoms';
 import { formatWorkPackageId } from '../../utils/id';
 import { useIsNodeInSelection } from '../../hooks/useIsNodeInSelection';
+import { placeCursorAfterInlineNode } from '../../utils/cursor';
+
+import {
+  buildWorkPackageInlineExternalDOM,
+  computeWorkPackageInlineExternalData,
+} from './externalHtml';
 
 export interface InlineWorkPackageChipProps {
   inlineContent:{ props:{ wpid:string; size:string; instanceId:string } };
@@ -80,17 +86,58 @@ export const InlineWorkPackageChip = ({ inlineContent, contentRef, editor }:Inli
     contentRef(node);
   };
 
-  // Close the options popover when the user clicks outside the chip
+  const deleteAndClose = useCallback(() => {
+    if (!wp) return;
+    wpBridge.delete({ instanceId, wpid: wp.id });
+    setIsSelected(false);
+  }, [instanceId, wp]);
+
   useEffect(() => {
     if (!isSelected) return;
+
     const onClickOutside = (e:MouseEvent) => {
       if (chipRef.current && !chipRef.current.contains(e.target as Node)) {
         setIsSelected(false);
       }
     };
+
+    const onKeyDown = (event:KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
+      if (event.key === 'Backspace' || event.key === 'Delete') {
+        event.preventDefault();
+        event.stopPropagation();
+        deleteAndClose();
+        return;
+      }
+
+      if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
+        event.preventDefault();
+      }
+    };
+
+    const onCopy = (event:ClipboardEvent) => {
+      const target = event.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+      const data = computeWorkPackageInlineExternalData({ wpid: rawWpid, instanceId, size });
+      if (!data || !event.clipboardData) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const dom = buildWorkPackageInlineExternalDOM(data, document);
+      event.clipboardData.setData('text/html', dom.outerHTML);
+      event.clipboardData.setData('text/plain', data.text);
+    };
+
     document.addEventListener('mousedown', onClickOutside);
-    return () => document.removeEventListener('mousedown', onClickOutside);
-  }, [isSelected]);
+    document.addEventListener('keydown', onKeyDown, true);
+    document.addEventListener('copy', onCopy, true);
+    return () => {
+      document.removeEventListener('mousedown', onClickOutside);
+      document.removeEventListener('keydown', onKeyDown, true);
+      document.removeEventListener('copy', onCopy, true);
+    };
+  }, [isSelected, instanceId, wp, rawWpid, size, deleteAndClose]);
 
   // Pending: waiting for user to pick a WP via search
   if (pendingCallbacks) {
@@ -134,7 +181,10 @@ export const InlineWorkPackageChip = ({ inlineContent, contentRef, editor }:Inli
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          setIsSelected((prev) => !prev);
+          const opening = !isSelected;
+          setIsSelected(opening);
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+          if (opening && editor) placeCursorAfterInlineNode(editor, instanceId);
         }}
       >
         {size === 'xxs' && <WpChipXXS wp={wp} />}
@@ -155,9 +205,7 @@ export const InlineWorkPackageChip = ({ inlineContent, contentRef, editor }:Inli
             onConvertToBlock={(blockSize) => {
               wpBridge.resize({ instanceId, wpid: wp.id, size: blockSize });
             }}
-            onRemove={() => {
-              wpBridge.delete({ instanceId, wpid: wp.id });
-            }}
+            onRemove={deleteAndClose}
           />
         )}
       </InlineChip>

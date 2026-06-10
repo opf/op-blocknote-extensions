@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import type { BlockNoteEditor, InlineContentFromConfig } from '@blocknote/core';
+import { TextSelection } from 'prosemirror-state';
 import { wpBridge, makeInstanceId } from '../../lib';
 import type { InlineWpSize, BlockWpSize, WpSize } from '../../lib';
 import { moveCursorAfterBlock } from '../utils/cursor';
@@ -111,8 +112,27 @@ function handleResize(editor:AnyEditor, instanceId:string, size:WpSize):void {
 }
 
 function handleDelete(editor:AnyEditor, instanceId:string):void {
+  let chipPos:number | null = null;
+  editor.prosemirrorState.doc.descendants((node, pos) => {
+    if (chipPos !== null) return false;
+    if ((node.attrs as Record<string, unknown>)?.instanceId === instanceId) {
+      chipPos = pos;
+      return false;
+    }
+    return true;
+  });
+
   updateInlineChip(editor, instanceId, () => null);
+
+  if (chipPos !== null) {
+    const pos = chipPos;
+    editor.transact((tr) => {
+      const safePos = Math.min(pos, tr.doc.content.size);
+      tr.setSelection(TextSelection.near(tr.doc.resolve(safePos)));
+    });
+  }
 }
+
 
 function handlePromoteToBlock(
   editor:AnyEditor,
