@@ -43,7 +43,7 @@ const schema = BlockNoteSchema.create().extend({
 type EditorType = typeof schema.BlockNoteEditor;
 ```
 
-Create the editor, passing `PasteDeduplicateInstanceIdsExtension` in `extensions`.
+Create the editor, passing `OpBlockNoteExtensions` in `extensions`.
 This must be done at construction time — registering the plugin post-mount via
 `editor.registerPlugin()` triggers ProseMirror's `reconfigure()`, which destroys
 the Y.js `UndoManager` and silently breaks Ctrl+Z.
@@ -51,9 +51,14 @@ the Y.js `UndoManager` and silently breaks Ctrl+Z.
 ```tsx
 const editor = useCreateBlockNote({
   schema,
-  extensions: [PasteDeduplicateInstanceIdsExtension],
+  extensions: [OpBlockNoteExtensions],
 });
 ```
+
+`OpBlockNoteExtensions` bundles:
+
+- **`PasteDeduplicateExtension`** — regenerates a fresh `instanceId` for every WP chip found in pasted content, preventing two chips from sharing the same ID.
+- **`KeyboardDeleteExtension`** — intercepts `Backspace` and `Delete` keystrokes and dispatches explicit ProseMirror transactions instead of falling through to the browser. Required when using Hocuspocus/Yjs, where the native DOM path becomes unreliable around atom nodes (WP chips) and causes keystrokes to silently do nothing.
 
 Wire the runtime hooks and build the slash and hash menus:
 

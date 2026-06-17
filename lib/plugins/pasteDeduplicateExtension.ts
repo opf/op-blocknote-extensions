@@ -18,7 +18,7 @@ import { pasteDeduplicatePlugin } from './pasteDeduplicatePlugin';
  * Adding the plugin to the editor's initial extension list avoids the
  * `reconfigure` pass entirely.
  */
-export const PasteDeduplicateInstanceIdsExtension = createExtension({
+export const PasteDeduplicateExtension = createExtension({
   key: 'pasteDeduplicateInstanceIds',
   prosemirrorPlugins: [pasteDeduplicatePlugin],
 });

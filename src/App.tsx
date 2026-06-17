@@ -16,7 +16,7 @@ import {
   workPackageSlashMenu,
   useHashWpMenu,
   useOpBlockNoteExtensions,
-  PasteDeduplicateInstanceIdsExtension,
+  OpBlockNoteExtensions,
 } from '../lib';
 import './fetchOverride';
 
@@ -45,7 +45,7 @@ function buildSlashMenuItems(editor:EditorType) {
 }
 
 export default function App() {
-  const editor = useCreateBlockNote({ schema, extensions: [PasteDeduplicateInstanceIdsExtension] });
+  const editor = useCreateBlockNote({ schema, extensions: [OpBlockNoteExtensions] });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
   useOpBlockNoteExtensions(editor as any);
