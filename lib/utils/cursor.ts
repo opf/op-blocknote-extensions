@@ -19,41 +19,6 @@ export function moveCursorAfterBlock(editor:AnyEditor, blockId:string):void {
   }
 }
 
-/**
- * Reports whether the inline node identified by `instanceId` is the last meaningful content
- * of `blockId` — i.e. nothing follows it, or only a single trailing space text node does.
- * Uses the BlockNote API only. When true, the cursor can be placed after the node via the
- * block-level `setTextCursorPosition(blockId, 'end')`, which BlockNote does support; mid-block
- * positions have no BlockNote API and need `placeCursorAfterInlineNode`.
- */
-export function isInlineNodeAtBlockEnd(
-  editor:AnyEditor,
-  blockId:string,
-  instanceId:string,
-):boolean {
-  const block = editor.getBlock(blockId);
-  if (!block) return false;
-
-  const content = (block.content ?? []) as {
-    type:string;
-    text?:string;
-    props?:{ instanceId?:string };
-  }[];
-
-  const index = content.findIndex(
-    (node) =>
-      node.type === 'openProjectWorkPackageInline' &&
-      node.props?.instanceId === instanceId,
-  );
-  if (index === -1) return false;
-
-  const after = content.slice(index + 1);
-  if (after.length === 0) return true;
-  return (
-    after.length === 1 && after[0].type === 'text' && after[0].text === ' '
-  );
-}
-
 export function placeCursorAfterInlineNode(
   editor:AnyEditor,
   instanceId:string,

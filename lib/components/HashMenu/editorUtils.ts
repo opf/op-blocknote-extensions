@@ -4,7 +4,6 @@ import { makeInstanceId } from '../../utils/id.ts';
 import type { WorkPackage } from '../../openProjectTypes';
 import {
   placeCursorAfterInlineNode,
-  isInlineNodeAtBlockEnd,
 } from '../../utils/cursor.ts';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -70,9 +69,7 @@ export function insertWpChip(editor:AnyEditor, wp:WorkPackage, size:InlineWpSize
     // after the trailing space; it runs after placeCursorAfterInlineNode so it wins. Mid-block
     // we keep placeCursorAfterInlineNode's position, since BlockNote has no inline-offset API.
     const blockId = editor.getTextCursorPosition()?.block?.id;
-    if (blockId && isInlineNodeAtBlockEnd(editor, blockId, instanceId)) {
-      editor.setTextCursorPosition(blockId, 'end');
-    }
+    editor.setTextCursorPosition(blockId, 'end');
   });
 }
 

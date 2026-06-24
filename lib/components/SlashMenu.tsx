@@ -6,7 +6,6 @@ import { registerInlineWpCallbacks, clearInlineWpCallbacks, makePendingWpid } fr
 import { makeInstanceId } from '../utils/id.ts';
 import {
   placeCursorAfterInlineNode,
-  isInlineNodeAtBlockEnd,
 } from '../utils/cursor.ts';
 import { pendingBlockRegistry } from './BlockWorkPackage/pendingBlockRegistry';
 import { isCurrentBlockEmpty } from '../utils/blockContent.ts';
@@ -61,13 +60,28 @@ function buildOnSelect(
       editor.focus();
       placeCursorAfterInlineNode(editor, instanceId);
 
-      // Additionally place the cursor via the BlockNote API. When the chip (plus its trailing
-      // space) is the last content of the block, setTextCursorPosition('end') lands the cursor
-      // after the trailing space; it runs after placeCursorAfterInlineNode so it wins. Mid-block
-      // we keep placeCursorAfterInlineNode's position, since BlockNote has no inline-offset API.
-      if (isInlineNodeAtBlockEnd(editor, current.blockId, instanceId)) {
-        editor.setTextCursorPosition(current.blockId, 'end');
-      }
+      // Mitigate bug where backspace would not work on text typed directly after adding
+      // a new inline work package link.
+      // Tiptap's built-in Backspace handler only covers special cases - undoing input
+      // rules, deleting a non-empty selection, joining blocks at the start of a line.
+      // For a normal cursor sitting in the middle of text, every registered handler
+      // returns false. ProseMirror then falls back to letting the browser handle the
+      // keystroke natively.
+      //
+      // The native path:
+      //
+      //     Browser modifies the DOM
+      //     ProseMirror's domObserver detects the change and creates a transaction
+      //     Transaction is sent to Yjs via ySyncPlugin
+      //
+      // Step 2 becomes unreliable when a WP chip is present. The chip is an atom node
+      // rendered with contenteditable="false". Combined with y-prosemirror's own DOM
+      // instrumentation, the domObserver either misses the change or produces an empty
+      // no-op transaction. ProseMirror and Yjs states diverge - Backspace does nothing.
+      //
+      // A re-sync event (timeout, click, or next edit) restores normal behavior.
+      // We're setting the cursor position to trigger this re-sync event.
+      editor.setTextCursorPosition(current.blockId, 'end');
     });
   };
 }
