@@ -4,7 +4,10 @@ import i18n from '../services/i18n.ts';
 import { getAliases } from '../services/slashMenuAliases';
 import { registerInlineWpCallbacks, clearInlineWpCallbacks, makePendingWpid } from './InlineWorkPackage/callbacks';
 import { makeInstanceId } from '../utils/id.ts';
-import { placeCursorAfterInlineNode } from '../utils/cursor.ts';
+import {
+  placeCursorAfterInlineNode,
+  isInlineNodeAtBlockEnd,
+} from '../utils/cursor.ts';
 import { pendingBlockRegistry } from './BlockWorkPackage/pendingBlockRegistry';
 import { isCurrentBlockEmpty } from '../utils/blockContent.ts';
 import type { AnyEditor } from './HashMenu/editorUtils';
@@ -57,6 +60,14 @@ function buildOnSelect(
     requestAnimationFrame(() => {
       editor.focus();
       placeCursorAfterInlineNode(editor, instanceId);
+
+      // Additionally place the cursor via the BlockNote API. When the chip (plus its trailing
+      // space) is the last content of the block, setTextCursorPosition('end') lands the cursor
+      // after the trailing space; it runs after placeCursorAfterInlineNode so it wins. Mid-block
+      // we keep placeCursorAfterInlineNode's position, since BlockNote has no inline-offset API.
+      if (isInlineNodeAtBlockEnd(editor, current.blockId, instanceId)) {
+        editor.setTextCursorPosition(current.blockId, 'end');
+      }
     });
   };
 }

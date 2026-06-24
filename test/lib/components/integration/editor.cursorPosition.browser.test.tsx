@@ -1,6 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import { renderEditor } from '../../../helpers/renderEditor';
+import {
+  insertInlineWorkPackageViaHash,
+  insertInlineWorkPackageViaSlashMenu,
+} from '../../../helpers/editorHelpers';
 
 async function setupEditorWithSurroundingText() {
   const editor = page.getByRole('textbox');

@@ -2,7 +2,10 @@ import type { BlockNoteEditor } from '@blocknote/core';
 import type { InlineWpSize } from '../WorkPackage/types';
 import { makeInstanceId } from '../../utils/id.ts';
 import type { WorkPackage } from '../../openProjectTypes';
-import { placeCursorAfterInlineNode } from '../../utils/cursor.ts';
+import {
+  placeCursorAfterInlineNode,
+  isInlineNodeAtBlockEnd,
+} from '../../utils/cursor.ts';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AnyEditor = BlockNoteEditor<any, any, any>;
@@ -61,6 +64,15 @@ export function insertWpChip(editor:AnyEditor, wp:WorkPackage, size:InlineWpSize
 
   requestAnimationFrame(() => {
     placeCursorAfterInlineNode(editor, instanceId);
+
+    // Additionally place the cursor via the BlockNote API. When the chip (plus its trailing
+    // space) is the last content of the block, setTextCursorPosition('end') lands the cursor
+    // after the trailing space; it runs after placeCursorAfterInlineNode so it wins. Mid-block
+    // we keep placeCursorAfterInlineNode's position, since BlockNote has no inline-offset API.
+    const blockId = editor.getTextCursorPosition()?.block?.id;
+    if (blockId && isInlineNodeAtBlockEnd(editor, blockId, instanceId)) {
+      editor.setTextCursorPosition(blockId, 'end');
+    }
   });
 }
 
