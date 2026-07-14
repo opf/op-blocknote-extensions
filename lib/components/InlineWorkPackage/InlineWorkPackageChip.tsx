@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styled, { css } from 'styled-components';
 import { useWorkPackage } from '../../hooks/useWorkPackage';
+import { useWorkPackagePreview } from '../../hooks/useWorkPackagePreview';
 import { useColors } from '../../services/colors';
 import { CHIP_STYLES } from '../WorkPackage/tokens';
 import { ChipBase, ChipBaseXXS } from './chipLayouts';
@@ -8,6 +9,8 @@ import { WorkPackageId } from '../WorkPackage/atoms';
 import { WpChipXXS, WpChipXS, WpChipS } from './InlineChips';
 import { WorkPackageSearchPopover } from '../Search/WorkPackageSearchPopover';
 import { WpOptionsPopover } from '../WorkPackage/OptionsPopover';
+import { WpPreviewPopover } from '../WorkPackage/PreviewPopover';
+import { UnavailableCard } from '../WorkPackage/UnavailableCard';
 import { getPendingCallbacks, clearInlineWpCallbacks } from './callbacks';
 import type { InlineWpSize } from '../WorkPackage/types';
 import {
@@ -48,6 +51,7 @@ const InlineChip = styled.span.attrs({
   display: inline;
   cursor: pointer;
   user-select: none;
+  -webkit-touch-callout: none;
   border-radius: ${CHIP_STYLES.radius};
   position: relative;
   line-height: 1;
@@ -86,6 +90,9 @@ export const InlineWorkPackageChip = ({ inlineContent, contentRef, editor, updat
   const [isSelected, setIsSelected] = useState(false);
   const chipRef = useRef<HTMLElement | null>(null);
 
+  const { previewOpen, closePreview, wasLongPress, triggerProps, cardProps } =
+    useWorkPackagePreview({ enabled: size === 'xxs', suppressed: isSelected });
+
   const isEditorSelected = useIsNodeInSelection(chipRef, editor);
 
   const setRef = (node:HTMLElement | null) => {
@@ -100,17 +107,52 @@ export const InlineWorkPackageChip = ({ inlineContent, contentRef, editor, updat
     editor.getExtension('formattingToolbar')?.store?.setState(false);
   };
 
-  // Close the options popover when the user clicks outside the chip
+  const handleWorkPackageClick = (e:React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // A long press already opened the preview; swallow the trailing click.
+    if (wasLongPress()) return;
+    closePreview();
+    setIsSelected((prev) => !prev);
+    selectWorkPackageNode();
+  };
+
+  // Close the options popover and long-press preview when the user taps outside the chip
   useEffect(() => {
-    if (!isSelected) return;
+    if (!isSelected && !previewOpen) return;
     const onClickOutside = (e:MouseEvent) => {
       if (chipRef.current && !chipRef.current.contains(e.target as Node)) {
         setIsSelected(false);
+        closePreview();
       }
     };
     document.addEventListener('mousedown', onClickOutside);
     return () => document.removeEventListener('mousedown', onClickOutside);
-  }, [isSelected]);
+  }, [isSelected, previewOpen, closePreview]);
+
+  const optionsPopover = (
+    <WpOptionsPopover
+      wp={wp ?? undefined}
+      currentSize={size}
+      // eslint-disable-next-line react-hooks/refs
+      anchorEl={chipRef.current}
+      onClose={() => setIsSelected(false)}
+      onResize={(newSize) => {
+        updateInlineContent?.({ type: 'openProjectWorkPackageInline', props: { ...inlineContent.props, size: newSize } });
+      }}
+      onConvertToBlock={(blockSize) => {
+        if (!editor || !chipRef.current) return;
+        const chip = findInlineChipAtDOM(editor, chipRef.current);
+        if (chip) promoteInlineChipToBlockAt(editor, chip.position, blockSize);
+      }}
+      onRemove={() => {
+        if (!editor || !chipRef.current) return;
+        const chip = findInlineChipAtDOM(editor, chipRef.current);
+        if (chip) removeInlineChipAt(editor, chip.position);
+      }}
+    />
+  );
 
   // Pending: waiting for user to pick a WP via search
   if (pendingCallbacks) {
@@ -144,6 +186,9 @@ export const InlineWorkPackageChip = ({ inlineContent, contentRef, editor, updat
 
   // Resolved
   if (wpid && wp) {
+    // Hidden while the options menu is open so the two popovers never stack.
+    const showPreview = size === 'xxs' && previewOpen && !isSelected;
+
     return (
       <InlineChip
         data-drag-handle
@@ -151,71 +196,82 @@ export const InlineWorkPackageChip = ({ inlineContent, contentRef, editor, updat
         aria-label={t('options.chipAriaLabel', { id: formatWorkPackageId(wp.displayId) })}
         ref={setRef}
         selected={isSelected || isEditorSelected}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setIsSelected((prev) => !prev);
-          selectWorkPackageNode();
-        }}
+        {...triggerProps}
+        onClick={handleWorkPackageClick}
       >
         {size === 'xxs' && <WpChipXXS wp={wp} />}
         {size === 'xs' && <WpChipXS wp={wp} />}
         {size === 's' && <WpChipS wp={wp} />}
 
-        {isSelected && (
-          <WpOptionsPopover
-            wp={wp}
-            currentSize={size}
+        {showPreview && (
+          <WpPreviewPopover
             // eslint-disable-next-line react-hooks/refs
             anchorEl={chipRef.current}
-            onClose={() => setIsSelected(false)}
-            onResize={(newSize) => {
-              updateInlineContent?.({ type: 'openProjectWorkPackageInline', props: { ...inlineContent.props, size: newSize } });
-            }}
-            onConvertToBlock={(blockSize) => {
-              if (!editor || !chipRef.current) return;
-              const chip = findInlineChipAtDOM(editor, chipRef.current);
-              if (chip) promoteInlineChipToBlockAt(editor, chip.position, blockSize);
-            }}
-            onRemove={() => {
-              if (!editor || !chipRef.current) return;
-              const chip = findInlineChipAtDOM(editor, chipRef.current);
-              if (chip) removeInlineChipAt(editor, chip.position);
-            }}
-          />
+            onClose={closePreview}
+            {...cardProps}
+          >
+            <BlockCard workPackage={wp} size="m" linkTitle />
+          </WpPreviewPopover>
         )}
+
+        {isSelected && optionsPopover}
       </InlineChip>
     );
   }
 
-  const unavailableWorkPackage = (icon:ReactNode, label:string) => {
-    // xxs stays tiny: icon only, with the label as a tooltip instead
+  const unavailableWorkPackage = (kind:'unauthorized' | 'error') => {
+    const inlineIcon = kind === 'unauthorized'
+      ? <EyeClosedIcon size={12} verticalAlign="middle" />
+      : <AlertIcon size={12} verticalAlign="middle" />;
+    const cardIcon = kind === 'unauthorized'
+      ? <EyeClosedIcon size={16} />
+      : <AlertIcon size={16} />;
+    const shortLabel = t(`unavailableWorkPackage.${kind}.short_message`);
+
+    // xxs stays tiny (icon only); the full message lives in the hover/long-press preview.
     const iconOnly = size === 'xxs';
     const Base = iconOnly ? ChipBaseXXS : ChipBase;
+    const showPreview = iconOnly && previewOpen;
+
     return (
       <InlineChip
         ref={setRef}
         data-drag-handle
-        selected={isEditorSelected}
-        // xxs shows no text, so expose the message to the tooltip and to assistive tech
-        title={iconOnly ? label : undefined}
-        aria-label={iconOnly ? label : undefined}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          selectWorkPackageNode();
-        }}
+        // icon-only xxs is a labelled state graphic; larger sizes carry visible text
+        role={iconOnly ? 'img' : undefined}
+        selected={isSelected || isEditorSelected}
+        aria-label={iconOnly ? shortLabel : undefined}
+        {...triggerProps}
+        onClick={handleWorkPackageClick}
       >
         <Base>
-          {icon}
-          {!iconOnly && <UnavailableLabel>{label}</UnavailableLabel>}
+          {inlineIcon}
+          {!iconOnly && <UnavailableLabel>{shortLabel}</UnavailableLabel>}
         </Base>
+
+        {showPreview && (
+          <WpPreviewPopover
+            anchorEl={chipRef.current}
+            onClose={closePreview}
+            {...cardProps}
+          >
+            <UnavailableCard
+              icon={cardIcon}
+              header={t(`unavailableWorkPackage.${kind}.header`)}
+              message={t(`unavailableWorkPackage.${kind}.message`)}
+            />
+          </WpPreviewPopover>
+        )}
+
+        {isSelected && optionsPopover}
       </InlineChip>
     );
   };
 
-  if (wpid && unauthorized) return unavailableWorkPackage(<EyeClosedIcon size={12} verticalAlign="middle" />, t('unavailableWorkPackage.unauthorized.short_message'));
-  if (wpid && error) return unavailableWorkPackage(<AlertIcon size={12} verticalAlign="middle" />, t('unavailableWorkPackage.error.short_message'));
+  // eslint-disable-next-line react-hooks/refs
+  if (wpid && unauthorized) return unavailableWorkPackage('unauthorized');
+  // eslint-disable-next-line react-hooks/refs
+  if (wpid && error) return unavailableWorkPackage('error');
 
   // Unknown / transitional
   if (wpid) {
