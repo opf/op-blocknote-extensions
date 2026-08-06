@@ -1,4 +1,4 @@
-import { BlockNoteEditor, SideMenuExtension } from '@blocknote/core';
+import type { BlockNoteEditor, SideMenuExtension } from '@blocknote/core';
 import { useSelectedBlocks } from '@blocknote/react';
 import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
@@ -19,11 +19,13 @@ import { defaultWpVariables } from '../WorkPackage/atoms';
 import { CHIP_STYLES } from '../WorkPackage/tokens';
 import { moveCursorAfterBlock } from '../../utils/cursor';
 import { pendingBlockRegistry } from './pendingBlockRegistry';
+import { useSuppressFormattingToolbar } from '../../hooks/useSuppressFormattingToolbar';
 
 const Block = styled.div.attrs({ className: 'op-bn-extensions', 'data-testid': 'block-wp-wrapper' })<{ $pending?:boolean; $selected?:boolean }>`
   ${defaultWpVariables}
   background-color: ${({ $pending }) => ($pending ? 'transparent' : 'var(--op-chip-bg)')};
-  user-select: all;
+  user-select: none;
+  -webkit-touch-callout: none;
   border-radius: var(--bn-border-radius);
   box-shadow: ${({ $selected }) => ($selected ? CHIP_STYLES.focusShadow : 'none')};
   ${({ $pending }) => $pending && 'position: relative;'}
@@ -68,6 +70,8 @@ export const BlockWorkPackageComponent = ({
   const isBlockSelected = selectedBlocks.some((b) => b.id === block.id);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
 
+  useSuppressFormattingToolbar(editor, isOptionsOpen);
+
   const workPackageResult = useWorkPackage(block.props.wpid);
   const selectedWorkPackage = workPackageResult.workPackage;
 
@@ -80,6 +84,9 @@ export const BlockWorkPackageComponent = ({
   }, [selectedWorkPackage?.displayId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const cardSize:BlockWpSize = block.props.size ?? 'm';
+  // The stored displayId may be '' (schema default), so ?? is not enough here.
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+  const displayId = block.props.displayId || String(block.props.wpid);
 
   useEffect(() => {
     return () => { pendingBlockRegistry.delete(block.id); };
@@ -106,7 +113,7 @@ export const BlockWorkPackageComponent = ({
     if (!isOptionsOpen) return;
     const handleClickOutside = (e:MouseEvent) => {
       const path = e.composedPath();
-      if (cardRef.current && !path.includes(cardRef.current as EventTarget)) {
+      if (cardRef.current && !path.includes(cardRef.current)) {
         setIsOptionsOpen(false);
       }
     };
@@ -134,6 +141,7 @@ export const BlockWorkPackageComponent = ({
   const optionsPopover = (
     <WpOptionsPopover
       wp={selectedWorkPackage ?? undefined}
+      displayId={displayId}
       currentSize={undefined}
       currentBlockSize={cardSize}
       // eslint-disable-next-line react-hooks/refs
@@ -171,13 +179,14 @@ export const BlockWorkPackageComponent = ({
           <>
             {workPackageResult.loading && (
               <UnavailableCard
-                header={t('unavailableWorkPackage.loading.header')}
-                message={t('unavailableWorkPackage.loading.message')}
+                headerKey="unavailableWorkPackage.loading.header"
+                messageKey="unavailableWorkPackage.loading.message"
               />
             )}
             {!workPackageResult.loading && (workPackageResult.error ?? workPackageResult.unauthorized) && (
               <UnavailableCardWrapper
                 ref={cardRef}
+                role="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsOptionsOpen((prev) => !prev);
@@ -186,14 +195,17 @@ export const BlockWorkPackageComponent = ({
                 {workPackageResult.error ? (
                   <UnavailableCard
                     icon={<AlertIcon size={16} />}
-                    header={t('unavailableWorkPackage.error.header')}
-                    message={t('unavailableWorkPackage.error.message')}
+                    headerKey="unavailableWorkPackage.error.header"
+                    messageKey="unavailableWorkPackage.error.message"
+                    displayId={displayId}
                   />
                 ) : (
                   <UnavailableCard
                     icon={<EyeClosedIcon size={16} />}
-                    header={t('unavailableWorkPackage.unauthorized.header')}
-                    message={t('unavailableWorkPackage.unauthorized.message')}
+                    headerKey="unavailableWorkPackage.unauthorized.header"
+                    messageKey="unavailableWorkPackage.unauthorized.message"
+                    displayId={displayId}
+                    linkHeader
                   />
                 )}
                 {isOptionsOpen && optionsPopover}

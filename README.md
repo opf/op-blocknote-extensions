@@ -29,6 +29,22 @@ First, initialize the library configuration:
 initializeOpBlockNoteExtensions({ baseUrl: 'https://my.openproject.url', locale: 'en' });
 ```
 
+`baseUrl` is the address of your OpenProject instance. It is used to build links
+to work packages and to recognize pasted work package URLs.
+
+Optionally, you can pass a `proxyUrl`. The authorized API requests are then sent
+to that address instead of `baseUrl`, which is useful if the API traffic has to
+be routed through a proxy, for example to inject authorization. Links to work
+packages and the recognition of pasted work package URLs keep using `baseUrl`.
+
+```js
+initializeOpBlockNoteExtensions({
+  baseUrl: 'https://my.openproject.url',
+  proxyUrl: 'https://my.proxy.url',
+  locale: 'en',
+});
+```
+
 Then set up a BlockNote schema extending it with the block and inline specs:
 
 ```tsx
@@ -43,23 +59,15 @@ const schema = BlockNoteSchema.create().extend({
 type EditorType = typeof schema.BlockNoteEditor;
 ```
 
-Create the editor, passing `PasteDeduplicateInstanceIdsExtension` in `extensions`.
-This must be done at construction time — registering the plugin post-mount via
-`editor.registerPlugin()` triggers ProseMirror's `reconfigure()`, which destroys
-the Y.js `UndoManager` and silently breaks Ctrl+Z.
+Create the editor:
 
 ```tsx
-const editor = useCreateBlockNote({
-  schema,
-  extensions: [PasteDeduplicateInstanceIdsExtension],
-});
+const editor = useCreateBlockNote({ schema });
 ```
 
-Wire the runtime hooks and build the slash and hash menus:
+Build the slash and hash menus:
 
 ```tsx
-useOpBlockNoteExtensions(editor);
-
 const getSlashItems = useCallback(
   async (query: string) =>
     filterSuggestionItems(
