@@ -119,6 +119,7 @@ describe('Inline chip - XXS hover preview', () => {
 
 describe('Inline chip - XXS long-press preview (touch)', () => {
   function forceTouch() {
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     const original = window.matchMedia;
     window.matchMedia = (query:string) => ({
       matches: false,
