@@ -1,8 +1,6 @@
-import type { BlockNoteEditor } from '@blocknote/core';
+import type { AnyEditor } from '../../editorTypes';
 import type { InlineWpSize } from '../WorkPackage/types';
 import type { WorkPackage } from '../../openProjectTypes';
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type AnyEditor = BlockNoteEditor<any, any, any>;
 
 interface RawNode {
   type:string;
@@ -64,6 +62,12 @@ export function insertWpChip(editor:AnyEditor, wp:WorkPackage, size:InlineWpSize
   const chipPosition = editor.prosemirrorState.selection.from - 2;
   removeTriggerBeforeChip(editor, chipPosition);
   editor.focus();
+}
+
+export function restoreHashQuery(editor:AnyEditor, query:string):void {
+  (editor.insertInlineContent as (content:unknown[]) => void)([
+    { type: 'text', text: `#${query}`, styles: {} },
+  ]);
 }
 
 /**
