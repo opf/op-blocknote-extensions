@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { AlertIcon } from '@primer/octicons-react';
 import { colorOfType } from '../../services/colors';
 import type { FieldValue, FormField, ValueProblem } from './formSchema';
+import { AllowedValuesSelect } from './AllowedValuesSelect';
 import { AllowedValuesTypeahead } from './AllowedValuesTypeahead';
 import { ProjectPicker } from './ProjectPicker';
-import { PickerArrows } from './PickerArrows';
 import {
   CheckboxRow,
   FieldError,
@@ -13,11 +13,8 @@ import {
   FieldRow,
   Notice,
   RequiredMark,
-  SelectControl,
-  SelectWrapper,
   TextAreaControl,
   TextControl,
-  TypeColorDot,
 } from './atoms';
 
 interface FormFieldControlProps {
@@ -61,10 +58,6 @@ export const FormFieldControl = ({
   const textValue = typeof value === 'string' ? value : '';
   const ownPlaceholder = PLACEHOLDERS[field.key];
   const placeholder = field.placeholder ?? (ownPlaceholder ? t(ownPlaceholder) : undefined);
-  const colorDot = field.key === 'type' && textValue
-    ? <TypeColorDot $color={colorOfType(textValue)} />
-    : null;
-
   const withError = (children:ReactNode) => (
     <FieldRow $invalid={Boolean(message)}>
       {children}
@@ -104,23 +97,17 @@ export const FormFieldControl = ({
   switch (field.kind) {
     case 'select':
       control = (
-        <SelectWrapper $withColorDot={Boolean(colorDot)}>
-          <SelectControl
-            id={id}
-            value={textValue}
-            onChange={(event) => onChange(event.target.value)}
-            {...invalid}
-          >
-            <option value="" disabled>
-              {placeholder ?? t('createWorkPackage.selectPlaceholder')}
-            </option>
-            {(field.allowedValues ?? []).map((allowed) => (
-              <option key={allowed.href} value={allowed.href}>{allowed.label}</option>
-            ))}
-          </SelectControl>
-          {colorDot}
-          <PickerArrows />
-        </SelectWrapper>
+        <AllowedValuesSelect
+          id={id}
+          label={field.label}
+          options={field.allowedValues ?? []}
+          value={textValue}
+          placeholder={placeholder ?? t('createWorkPackage.selectPlaceholder')}
+          colorOf={field.key === 'type' ? colorOfType : undefined}
+          invalid={Boolean(message)}
+          describedBy={errorId}
+          onChange={onChange}
+        />
       );
       break;
     case 'typeahead': {
