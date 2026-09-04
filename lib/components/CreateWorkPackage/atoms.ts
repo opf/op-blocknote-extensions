@@ -201,8 +201,15 @@ export const HeaderTitle = styled.span`
 export const Body = styled.div`
   flex: 1;
   min-height: 0;
-  padding: var(--spacer-xl);
   overflow-y: auto;
+
+  &[data-growing] {
+    overflow-y: hidden;
+  }
+`;
+
+export const BodyContent = styled.div`
+  padding: var(--spacer-xl);
 `;
 
 export const Footer = styled.div`
@@ -212,6 +219,15 @@ export const Footer = styled.div`
   gap: var(--spacer-m);
   padding: var(--spacer-m);
   border-top: 1px solid ${borderColor};
+`;
+
+export const FooterStatus = styled.div`
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-s);
+  margin-right: auto;
+  font-size: 0.85em;
+  color: var(--op-create-wp-muted);
 `;
 
 export const IconButton = styled.button`
@@ -284,6 +300,10 @@ const fieldIn = keyframes`
 export const FieldRow = styled.div<{ $invalid?:boolean }>`
   margin-bottom: var(--spacer-xl);
   animation: ${fieldIn} 0.18s ease;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 
   /*  Tripled: the controls carry their own doubled rules, ":focus" among them.  */
   ${({ $invalid }) => $invalid && css`
@@ -449,22 +469,6 @@ const spin = keyframes`
 export const Spinner = styled.span`
   display: inline-flex;
   animation: ${spin} 0.9s linear infinite;
-`;
-
-export const LoadingRow = styled.div<{ $reserveHeight?:boolean }>`
-  display: flex;
-  align-items: center;
-  gap: var(--spacer-m);
-  padding-bottom: var(--spacer-xl);
-  font-size: 0.85em;
-  color: var(--op-create-wp-muted);
-
-  /*  Stands in for the fields still loading, holding part of their height.  */
-  ${({ $reserveHeight }) => $reserveHeight && css`
-    justify-content: center;
-    min-height: 12rem;
-    padding-bottom: 0;
-  `}
 `;
 
 export const SuggestionList = styled.div`
