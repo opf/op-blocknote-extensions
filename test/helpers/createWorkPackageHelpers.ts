@@ -1,6 +1,11 @@
 import { expect } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 
+export function colorChannelsOf(element:Element):string[] {
+  const styles = getComputedStyle(element);
+  return ['--color-r', '--color-g', '--color-b'].map((channel) => styles.getPropertyValue(channel).trim());
+}
+
 export const modalPanel = ():HTMLElement => page.getByTestId('create-wp-modal').element() as HTMLElement;
 
 export const modalBody = ():HTMLElement => modalPanel().querySelector<HTMLElement>('form > div')!;
@@ -38,16 +43,10 @@ export async function clearProject() {
   await userEvent.click(page.getByTestId('op-bn-create-wp-project-list-deselect'));
 }
 
-// Chosen by what the option reads as; a plain string would be matched against
-// its value, which here is an API href. Looked up inside the field, so an
-// option of the same name elsewhere on the form is not what gets picked.
 export async function selectOptionNamed(label:string, option:string) {
-  const select = page.getByLabelText(label).element() as HTMLSelectElement;
-  const choices = Array.from(select.options);
-  const target = choices.find((choice) => choice.text === option);
-  if (!target) throw new Error(`No option "${option}" in "${label}", only: ${choices.map((choice) => choice.text).join(', ')}`);
-
-  await userEvent.selectOptions(page.getByLabelText(label), target);
+  await userEvent.click(page.getByLabelText(label));
+  await expect.element(page.getByRole('option', { name: option })).toBeVisible();
+  await userEvent.click(page.getByRole('option', { name: option }));
 }
 
 export async function fillRequiredFields(subject:string) {

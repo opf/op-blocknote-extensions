@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { XCircleFillIcon } from '@primer/octicons-react';
-import { Suggestions } from './Suggestions';
+import { Suggestions, usePickerMotion } from './Suggestions';
 import { usePickerOptions } from './usePickerOptions';
 import type { AllowedValue } from './formSchema';
 import {
@@ -46,7 +46,13 @@ export const AllowedValuesTypeahead = ({
   const selectionRef = useRef({ value, label: valueLabel ?? '' });
 
   const listId = `${id}-list`;
+  const { mounted, open, onClosed } = usePickerMotion(isOpen);
   const { options, loading, toggleExpanded } = usePickerOptions({ href, query, isOpen });
+
+  const reopen = () => {
+    clearTimeout(blurTimerRef.current);
+    setIsOpen(true);
+  };
   const selectedIndex = options.findIndex((option) => option.href === value);
   const activeIndex = Math.min(
     focusedIndex ?? Math.max(selectedIndex, 0),
@@ -123,13 +129,13 @@ export const AllowedValuesTypeahead = ({
         spellCheck={false}
         placeholder={placeholder}
         value={query}
-        onFocus={() => setIsOpen(true)}
+        onFocus={reopen}
         // A click on the already focused field fires no focus event.
-        onClick={() => setIsOpen(true)}
+        onClick={reopen}
         onChange={(event) => {
           setQuery(event.target.value);
           setFocusedIndex(0);
-          setIsOpen(true);
+          reopen();
           if (value) onChange('');
         }}
         onKeyDown={handleKeyDown}
@@ -155,7 +161,7 @@ export const AllowedValuesTypeahead = ({
         </TrailingActions>
       )}
 
-      {isOpen && (
+      {mounted && (
         <Suggestions
           id={listId}
           label={label}
@@ -168,6 +174,8 @@ export const AllowedValuesTypeahead = ({
           onPick={select}
           onDeselect={clear}
           onToggleExpanded={toggleExpanded}
+          open={open}
+          onClosed={onClosed}
         >
           {loading ? t('createWorkPackage.loading') : t('createWorkPackage.noResults')}
         </Suggestions>
