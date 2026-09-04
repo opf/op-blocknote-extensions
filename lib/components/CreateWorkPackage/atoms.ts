@@ -221,6 +221,15 @@ export const Footer = styled.div`
   border-top: 1px solid ${borderColor};
 `;
 
+export const FooterStatus = styled.div`
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-s);
+  margin-right: auto;
+  font-size: 0.85em;
+  color: var(--op-create-wp-muted);
+`;
+
 export const IconButton = styled.button`
   display: flex;
   align-items: center;
@@ -460,22 +469,6 @@ const spin = keyframes`
 export const Spinner = styled.span`
   display: inline-flex;
   animation: ${spin} 0.9s linear infinite;
-`;
-
-export const LoadingRow = styled.div<{ $reserveHeight?:boolean }>`
-  display: flex;
-  align-items: center;
-  gap: var(--spacer-m);
-  padding-bottom: var(--spacer-xl);
-  font-size: 0.85em;
-  color: var(--op-create-wp-muted);
-
-  /*  Stands in for the fields still loading, holding part of their height.  */
-  ${({ $reserveHeight }) => $reserveHeight && css`
-    justify-content: center;
-    min-height: 12rem;
-    padding-bottom: 0;
-  `}
 `;
 
 export const SuggestionList = styled.div`

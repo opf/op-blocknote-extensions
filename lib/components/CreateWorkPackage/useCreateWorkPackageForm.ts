@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import type { WorkPackage, WorkPackageForm, WorkPackagePayload } from '../../openProjectTypes';
 import { createWorkPackage, fetchWorkPackageCreateForm, OpenProjectApiError } from '../../services/openProjectApi';
 import {
-  allowedValueOf,
   applyLabel,
   applyValue,
   buildCreatePayload,
@@ -31,7 +30,6 @@ export interface CreateWorkPackageFormState {
   projectHref?:string;
   typeHref?:string;
   isDirty:boolean;
-  selectedTypeLabel?:string;
   loading:boolean;
   initialising:boolean;
   loadError:string | null;
@@ -147,8 +145,6 @@ export function useCreateWorkPackageForm(
   const extraFields = selected.type ? extraRequiredFields(schema) : [];
   const allFields = [...primaryFields, ...extraFields];
 
-  const selectedTypeLabel = allowedValueOf(primaryFields.find((field) => field.key === 'type'), typeHref)?.label;
-
   const setValue = (key:string, value:FieldValue, label?:string) => {
     setTouched(true);
     setSubmitError(null);
@@ -234,7 +230,6 @@ export function useCreateWorkPackageForm(
     projectHref,
     typeHref,
     isDirty,
-    selectedTypeLabel,
     loading,
     initialising,
     loadError: loading ? null : loadError,
