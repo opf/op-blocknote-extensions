@@ -30,6 +30,7 @@ export const en = {
       'favorites': "Обране",
       'clear': "Очистити",
       'deselect': "Видалити вибір",
+      'removeValue': 'Remove {{value}}',
       'openOptions': "Показати варіанти",
       'closeOptions': "Приховати варіанти",
       'subjectPlaceholder': "Введіть тему тут",
