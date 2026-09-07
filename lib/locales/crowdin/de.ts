@@ -15,6 +15,9 @@ export const en = {
         'create': "erstellen"
       }
     },
+    'formattingToolbar': {
+      'createWorkPackage': 'Create work package'
+    },
     'createWorkPackage': {
       'title': "Neues Arbeitspaket erstellen",
       'close': "Schließen",
@@ -34,6 +37,7 @@ export const en = {
       'openOptions': "Optionen anzeigen",
       'closeOptions': "Optionen ausblenden",
       'subjectPlaceholder': "Geben Sie hier den Betreff ein",
+      'subjectClipped': 'The selected text was too long and has been shortened to the first {{limit}} characters.',
       'projectPlaceholder': "Wählen Sie ein Projekt aus…",
       'loadingFields': "Die Felder dieses Arbeitspakets werden geladen…",
       'loadingTypeFields': "Pflichtfelder für {{type}} werden geladen…",
