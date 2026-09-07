@@ -15,6 +15,9 @@ export const en = {
         'create': "створити"
       }
     },
+    'formattingToolbar': {
+      'createWorkPackage': 'Create work package'
+    },
     'createWorkPackage': {
       'title': "Створити новий робочий пакет",
       'close': "Закрити",
@@ -30,10 +33,11 @@ export const en = {
       'favorites': "Обране",
       'clear': "Очистити",
       'deselect': "Видалити вибір",
-      'removeValue': 'Remove {{value}}',
+      'removeValue': "Видалити {{value}}",
       'openOptions': "Показати варіанти",
       'closeOptions': "Приховати варіанти",
       'subjectPlaceholder': "Введіть тему тут",
+      'subjectClipped': 'The selected text was too long and has been shortened to the first {{limit}} characters.',
       'projectPlaceholder': "Виберіть проєкт…",
       'loadingFields': "Завантаження полів цього робочого пакета…",
       'loadingTypeFields': "Завантаження обов'язкових полів для {{type}}…",
