@@ -16,7 +16,7 @@ export const en = {
       }
     },
     'formattingToolbar': {
-      'createWorkPackage': 'Create work package'
+      'createWorkPackage': "Створити пакет робіт"
     },
     'createWorkPackage': {
       'title': "Створити новий робочий пакет",
@@ -37,10 +37,8 @@ export const en = {
       'openOptions': "Показати варіанти",
       'closeOptions': "Приховати варіанти",
       'subjectPlaceholder': "Введіть тему тут",
-      'subjectClipped': 'The selected text was too long and has been shortened to the first {{limit}} characters.',
+      'subjectClipped': "Вибраний текст був занадто довгим і був скорочений до перших {{limit}} символів.",
       'projectPlaceholder': "Виберіть проєкт…",
-      'loadingFields': "Завантаження полів цього робочого пакета…",
-      'loadingTypeFields': "Завантаження обов'язкових полів для {{type}}…",
       'loadFailed': "Не вдалося завантажити форму робочого пакета: {{message}}",
       'notAllowed': "Вам не дозволено створювати робочі пакети.",
       'validationFailed': "Будь ласка, виправте виділені поля нижче.",
