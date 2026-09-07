@@ -30,6 +30,7 @@ export const en = {
       'favorites': "Favoriten",
       'clear': "Zurücksetzen",
       'deselect': "Auswahl entfernen",
+      'removeValue': 'Remove {{value}}',
       'openOptions': "Optionen anzeigen",
       'closeOptions': "Optionen ausblenden",
       'subjectPlaceholder': "Geben Sie hier den Betreff ein",
