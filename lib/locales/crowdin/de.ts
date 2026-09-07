@@ -39,8 +39,6 @@ export const en = {
       'subjectPlaceholder': "Geben Sie hier den Betreff ein",
       'subjectClipped': 'The selected text was too long and has been shortened to the first {{limit}} characters.',
       'projectPlaceholder': "Wählen Sie ein Projekt aus…",
-      'loadingFields': "Die Felder dieses Arbeitspakets werden geladen…",
-      'loadingTypeFields': "Pflichtfelder für {{type}} werden geladen…",
       'loadFailed': "Das Arbeitspaket-Formular konnte nicht geladen werden: {{message}}",
       'notAllowed': "Sie sind nicht berechtigt, Arbeitspakete zu erstellen.",
       'validationFailed': "Bitte korrigieren Sie die unten hervorgehobenen Felder.",
