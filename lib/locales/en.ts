@@ -3,12 +3,51 @@ export const en = {
     'slashMenu': {
       'title': 'Link existing work package',
       'subtext': 'Add a dynamic link to a single work package',
+      'create': {
+        'title': 'Create new work package',
+        'subtext': 'Create a work package and link it here'
+      },
       'aliases': {
         'workpackage': 'workpackage',
         'work package': 'work package',
         'wp': 'wp',
-        'link': 'link'
+        'link': 'link',
+        'create': 'create'
       }
+    },
+    'formattingToolbar': {
+      'createWorkPackage': 'Create work package'
+    },
+    'createWorkPackage': {
+      'title': 'Create new work package',
+      'close': 'Close',
+      'cancel': 'Cancel',
+      'create': 'Create',
+      'creating': 'Creating…',
+      'selectPlaceholder': 'Please select…',
+      'searchPlaceholder': 'Type to search…',
+      'loading': 'Loading…',
+      'noResults': 'No results',
+      'filterBy': 'Filter the list',
+      'allValues': 'All',
+      'favorites': 'Favorites',
+      'clear': 'Clear',
+      'deselect': 'Remove selection',
+      'removeValue': 'Remove {{value}}',
+      'openOptions': 'Show options',
+      'closeOptions': 'Hide options',
+      'subjectPlaceholder': 'Enter subject here',
+      'subjectClipped': 'The selected text was too long and has been shortened to the first {{limit}} characters.',
+      'projectPlaceholder': 'Select a project…',
+      'loadFailed': 'The work package form could not be loaded: {{message}}',
+      'notAllowed': 'You are not allowed to create work packages.',
+      'validationFailed': 'Please correct the highlighted fields below.',
+      'requiredField': 'This field is required.',
+      'notANumber': 'Please enter a number.',
+      'notAWholeNumber': 'Please enter a whole number, without a decimal separator.',
+      'unsupportedField': '"{{field}}" cannot be set here.',
+      'unsupportedRequired': 'This work package requires a field that cannot be set here.',
+      'createInOpenProject': 'Create it in OpenProject'
     },
     'search': {
       'label': 'Link existing work package',

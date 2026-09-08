@@ -2,9 +2,12 @@ import './services/i18n.ts';
 export {
   openProjectWorkPackageBlockSpec,
   openProjectWorkPackageInlineSpec,
-  workPackageSlashMenu,
+  getOpenProjectSlashMenuItems,
+  OpenProjectFormattingToolbar,
+  useCreateWorkPackageFromSelection,
   ShadowDomWrapper,
 } from './components';
+export type { CreateWorkPackageFromSelection } from './components';
 export { initializeOpBlockNoteExtensions } from './initialize';
 export type { InlineWpSize, BlockWpSize, WpSize } from './components/WorkPackage/types';
 export { createHashWpMenuComponent, isHashWpQuery, useHashWpMenu } from './components/HashMenu';

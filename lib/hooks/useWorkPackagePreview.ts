@@ -29,7 +29,9 @@ interface ChipTriggerProps {
   onPointerDown:(e:ReactPointerEvent) => void;
   onPointerUp:() => void;
   onPointerMove:(e:ReactPointerEvent) => void;
-  onPointerCancel:() => void;
+  // Deliberately no onPointerCancel: iOS fires it mid-press when it lifts the chip for a
+  // native drag, and aborting there left the preview never opening. Only the finger lifting
+  // or moving means no preview was wanted, so an armed press outlives a cancelled pointer.
   onContextMenu:((e:ReactMouseEvent) => void) | undefined;
   // Claim the touch gesture so the browser doesn't start panning and fire
   // pointercancel mid-press, which used to make the long press fire only sometimes.
@@ -73,8 +75,8 @@ export function useWorkPackagePreview({ enabled, suppressed }:UseWorkPackagePrev
     [clearTimers]
   );
 
-  // Stable identity: the popover's positioning effect subscribes scroll/resize
-  // listeners keyed on onClose, so it must not change every render.
+  // Stable identity: the chip closes the preview from an effect keyed on it, so
+  // it must not change every render.
   const closePreview = useCallback(() => {
     clearTimers();
     setPreviewOpen(false);
@@ -128,7 +130,6 @@ export function useWorkPackagePreview({ enabled, suppressed }:UseWorkPackagePrev
         onPointerDown: handleLongPressStart,
         onPointerUp: cancelLongPress,
         onPointerMove: handleLongPressMove,
-        onPointerCancel: cancelLongPress,
         onContextMenu: canHover ? undefined : (e:ReactMouseEvent) => e.preventDefault(),
         style: { touchAction: 'none' as const },
       }

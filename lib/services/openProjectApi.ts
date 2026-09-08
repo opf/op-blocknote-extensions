@@ -1,5 +1,15 @@
 
-import type {OpenProjectResponse, StatusCollection, TypeCollection, WorkPackage} from '../openProjectTypes';
+import type {
+  HalCollection,
+  HalResource,
+  OpenProjectApiErrorBody,
+  OpenProjectResponse,
+  StatusCollection,
+  TypeCollection,
+  WorkPackage,
+  WorkPackageForm,
+  WorkPackagePayload,
+} from '../openProjectTypes';
 
 let baseUrl = 'https://openproject.local';
 let proxyUrl = 'https://openproject.local';
@@ -7,10 +17,12 @@ let proxyUrl = 'https://openproject.local';
 
 export class OpenProjectApiError extends Error {
   responseStatus?:number;
+  attributeErrors:Record<string, string>;
 
-  constructor(message:string, responseStatus?:number) {
+  constructor(message:string, responseStatus?:number, attributeErrors:Record<string, string> = {}) {
     super(message);
     this.responseStatus = responseStatus;
+    this.attributeErrors = attributeErrors;
     this.name = 'OpenProjectApiError';
   }
 }
@@ -44,8 +56,59 @@ async function get<T>(endpoint:string):Promise<T> {
   return response.json() as Promise<T>;
 }
 
+interface ApiError {
+  message:string;
+  attributeErrors:Record<string, string>;
+}
+
+async function readError(response:Response):Promise<ApiError> {
+  const statusLine = `HTTP error! status: ${response.status} - ${response.statusText}`;
+
+  try {
+    const body = await response.json() as OpenProjectApiErrorBody;
+    // A lone violation is the error itself; several are nested under a summary.
+    const entries = body._embedded?.errors ?? [body];
+    const messages = entries.flatMap((entry) => (entry.message ? [entry.message] : []));
+
+    const attributeErrors:Record<string, string> = {};
+    for (const entry of entries) {
+      const attribute = entry._embedded?.details?.attribute;
+      if (attribute && entry.message && !attributeErrors[attribute]) attributeErrors[attribute] = entry.message;
+    }
+
+    if (messages.length > 0) return { message: messages.join(' '), attributeErrors };
+
+    return { message: body.message ?? statusLine, attributeErrors };
+  } catch { /* no JSON body */ }
+
+  return { message: statusLine, attributeErrors: {} };
+}
+
+async function post<T>(endpoint:string, body:unknown):Promise<T> {
+  const response = await fetch(`${proxyUrl}${endpoint}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      // The API refuses a session authenticated write without it over plain HTTP.
+      'X-Requested-With': 'XMLHttpRequest',
+    },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    const { message, attributeErrors } = await readError(response);
+    throw new OpenProjectApiError(message, response.status, attributeErrors);
+  }
+  return response.json() as Promise<T>;
+}
+
 export function linkToWorkPackage(displayId:string):string {
   return `${baseUrl}/wp/${encodeURIComponent(displayId)}`;
+}
+
+export function linkToNewWorkPackage(projectId?:string):string {
+  return projectId
+    ? `${baseUrl}/projects/${encodeURIComponent(projectId)}/work_packages/new`
+    : `${baseUrl}/work_packages/new`;
 }
 
 const WP_ID_URL_PATTERN = '\\d+|[A-Za-z][A-Za-z0-9_]*-\\d+';
@@ -96,11 +159,112 @@ export function fetchTypes():Promise<TypeCollection> {
   });
 }
 
-export async function searchWorkPackages(query:string):Promise<WorkPackage[]> {
-  const filters = encodeURIComponent(`[{"typeahead":{"operator":"**","values":["${query}"]}}]`);
-  const sortBy = encodeURIComponent('[["exactMatch","desc"],["updatedAt","desc"]]');
+/*  Beyond one page of them a listing is searched rather than browsed.  */
+const ALLOWED_VALUES_PAGE_SIZE = 100;
 
-  const endpoint = `/api/v3/work_packages?filters=${filters}&sortBy=${sortBy}`;
-  const data = await get<OpenProjectResponse>(endpoint);
+/**
+ * Asks the API which attributes a new work package needs: an empty payload yields
+ * the bare schema, sending the project back its types, the type its statuses.
+ */
+export function fetchWorkPackageCreateForm(payload:WorkPackagePayload = {}):Promise<WorkPackageForm> {
+  return post<WorkPackageForm>('/api/v3/work_packages/form', payload);
+}
+
+export function createWorkPackage(payload:WorkPackagePayload):Promise<WorkPackage> {
+  return post<WorkPackage>('/api/v3/work_packages', payload);
+}
+
+type HalFilter = Record<string, { operator:string; values:string[] }>;
+
+const TYPEAHEAD_FILTER = (query:string):HalFilter => ({ typeahead: { operator: '**', values: [query] } });
+const FAVORED_FILTER:HalFilter = { favored: { operator: '=', values: ['t'] } };
+
+const HIERARCHY_ORDER = JSON.stringify([['lft', 'asc']]);
+
+function withQuery(href:string, added:HalFilter[], nested:boolean):string {
+  const separator = href.indexOf('?');
+  const path = separator === -1 ? href : href.slice(0, separator);
+  const params = new URLSearchParams(separator === -1 ? '' : href.slice(separator + 1));
+
+  if (added.length > 0) {
+    let filters:unknown[] = [];
+    try {
+      const parsed = JSON.parse(params.get('filters') ?? '[]') as unknown;
+      if (Array.isArray(parsed)) filters = parsed;
+    } catch { /* not our filters to interpret */ }
+
+    params.set('filters', JSON.stringify([...filters, ...added]));
+  }
+
+  if (nested && !params.has('sortBy')) params.set('sortBy', HIERARCHY_ORDER);
+  if (!params.has('pageSize')) params.set('pageSize', String(ALLOWED_VALUES_PAGE_SIZE));
+
+  return `${path}?${params.toString()}`;
+}
+
+async function listValues(url:string):Promise<HalResource[]> {
+  const data = await get<HalCollection<HalResource>>(url);
+  return data._embedded?.elements ?? [];
+}
+
+function assertApiHref(href:string):void {
+  if (!href.startsWith('/api/v3/')) {
+    throw new OpenProjectApiError(`Unexpected allowed values href: ${href}`);
+  }
+}
+
+export interface AllowedValuesQuery {
+  favoredOnly?:boolean;
+  nested?:boolean;
+}
+
+/**
+ * Follows the `allowedValues` link of a schema attribute, narrowed by a typeahead
+ * term and by what the caller asks for. An endpoint that rejects the typeahead
+ * filter answers 400 and is retried without the term.
+ */
+export async function fetchAllowedValues(
+  href:string,
+  query = '',
+  { favoredOnly = false, nested = false }:AllowedValuesQuery = {}
+):Promise<{ resources:HalResource[]; filtered:boolean }> {
+  assertApiHref(href);
+
+  const kept = favoredOnly ? [FAVORED_FILTER] : [];
+  const trimmedQuery = query.trim();
+
+  if (trimmedQuery) {
+    try {
+      const narrowing = [...kept, TYPEAHEAD_FILTER(trimmedQuery)];
+      return { resources: await listValues(withQuery(href, narrowing, nested)), filtered: true };
+    } catch (error) {
+      if (!(error instanceof OpenProjectApiError) || error.responseStatus !== 400) throw error;
+      console.warn('[OpenProjectApi] typeahead filter rejected, retrying unfiltered:', error);
+    }
+  }
+
+  return { resources: await listValues(withQuery(href, kept, nested)), filtered: false };
+}
+
+/** Follows the `allowedValues` link of a schema attribute, narrowed to the resource of the given id. */
+export async function fetchAllowedValueById(
+  href:string,
+  id:string | number
+):Promise<HalResource | undefined> {
+  assertApiHref(href);
+
+  const data = await get<HalCollection<HalResource>>(
+    withQuery(href, [{ id: { operator: '=', values: [String(id)] } }], false)
+  );
+  return data._embedded?.elements?.[0];
+}
+
+export async function searchWorkPackages(query:string):Promise<WorkPackage[]> {
+  const params = new URLSearchParams({
+    filters: JSON.stringify([{ typeahead: { operator: '**', values: [query] } }]),
+    sortBy: JSON.stringify([['exactMatch', 'desc'], ['updatedAt', 'desc']]),
+  });
+
+  const data = await get<OpenProjectResponse>(`/api/v3/work_packages?${params.toString()}`);
   return data?._embedded?.elements as unknown as WorkPackage[] ?? [];
 }

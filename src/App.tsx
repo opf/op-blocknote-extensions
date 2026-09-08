@@ -13,7 +13,8 @@ import {
   initializeOpBlockNoteExtensions,
   openProjectWorkPackageBlockSpec,
   openProjectWorkPackageInlineSpec,
-  workPackageSlashMenu,
+  getOpenProjectSlashMenuItems,
+  OpenProjectFormattingToolbar,
   useHashWpMenu,
 } from '../lib';
 import './fetchOverride';
@@ -38,7 +39,7 @@ function buildSlashMenuItems(editor:EditorType) {
   return [
     ...getDefaultReactSlashMenuItems(editor),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-    workPackageSlashMenu(editor as any),
+    ...getOpenProjectSlashMenuItems(editor as any),
   ];
 }
 
@@ -53,9 +54,10 @@ export default function App() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
   const { getHashItems, HashWpMenu } = useHashWpMenu(editor as any);
-
   return (
-    <BlockNoteView editor={editor} slashMenu={false}>
+    <BlockNoteView editor={editor} slashMenu={false} formattingToolbar={false}>
+      <OpenProjectFormattingToolbar />
+
       <SuggestionMenuController
         triggerCharacter="/"
         getItems={getSlashItems}

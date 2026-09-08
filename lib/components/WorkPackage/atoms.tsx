@@ -7,11 +7,15 @@ import {
 } from '../../services/colors';
 import { linkToWorkPackage } from '../../services/openProjectApi';
 
+/* lets a line break between two meta parts that are each kept unbroken  */
+export const WRAP_OPPORTUNITY = '\u200B';
+
 export const defaultWpVariables = css`
   --spacer-s: 4px;
   --spacer-m: 8px;
   --spacer-l: 12px;
   --spacer-xl: 16px;
+  --spacer-xxl: 20px;
 
   /* BlockNote's node-selection outline color; not exposed by BlockNote as a variable, so defined here */
   --blocknote-focus-color: rgb(100, 160, 255);
@@ -29,6 +33,21 @@ export const defaultWpVariables = css`
     --op-chip-bg: var(--bn-colors-disabled-text);
     --op-item-hover-bg: rgba(255, 255, 255, 0.12);
   }
+`;
+
+export const menuSurfaceStyles = css`
+  background-color: var(--bn-colors-menu-background, #fff);
+  color: var(--bn-colors-menu-text, #3f3f3f);
+`;
+
+// The -webkit- prefix is not redundant: Safari (including iOS) implements only the prefixed
+// property and styled-components v6 no longer auto-prefixes, so unprefixed alone leaves the
+// chip text selectable there. Belongs on the container only: `user-select` is not inherited,
+// but `auto` on a descendant resolves to `none` under a non-selectable parent.
+export const nonSelectableStyles = css`
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 `;
 
 export const WorkPackageId = styled.span.attrs({
@@ -53,7 +72,7 @@ export const WorkPackageType = styled.span.attrs({
   font-weight: ${({ $compact }) => ($compact ? 600 : 500)};
   text-transform: uppercase;
   color: ${typeTextColor} !important;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 
   ${({ $compact }) =>
     $compact &&

@@ -7,10 +7,12 @@ import { WorkPackageId } from '../WorkPackage/atoms';
 import { WpChipXXS, WpChipXS, WpChipS } from './InlineChips';
 import { UnavailableChip } from './UnavailableChip';
 import { WorkPackageSearchPopover } from '../Search/WorkPackageSearchPopover';
+import { CreateWorkPackageModal } from '../CreateWorkPackage';
 import { WpOptionsPopover } from '../WorkPackage/OptionsPopover';
 import { WpPreviewPopover } from '../WorkPackage/PreviewPopover';
 import { getPendingCallbacks, clearInlineWpCallbacks } from './callbacks';
 import type { InlineWpSize } from '../WorkPackage/types';
+import type { WorkPackage } from '../../openProjectTypes';
 import {
   findInlineChipAtDOM,
   selectInlineChipAt,
@@ -57,6 +59,7 @@ export const InlineWorkPackageChip = ({ inlineContent, contentRef, editor, updat
 
   const [isSelected, setIsSelected] = useState(false);
   const chipRef = useRef<HTMLElement | null>(null);
+  const [chipEl, setChipEl] = useState<HTMLElement | null>(null);
 
   const preview = useWorkPackagePreview({ enabled: size === 'xxs', suppressed: isSelected });
   const { previewOpen, closePreview, wasLongPress, triggerProps, cardProps } = preview;
@@ -67,6 +70,7 @@ export const InlineWorkPackageChip = ({ inlineContent, contentRef, editor, updat
 
   const setRef = (node:HTMLElement | null) => {
     chipRef.current = node;
+    if (pendingCallbacks || node === null) setChipEl(node);
     contentRef(node);
   };
 
@@ -125,21 +129,35 @@ export const InlineWorkPackageChip = ({ inlineContent, contentRef, editor, updat
     />
   );
 
-  // Pending: waiting for user to pick a WP via search
   if (pendingCallbacks) {
+    const resolvePending = (resolvedWp:WorkPackage) => {
+      pendingCallbacks.onSelect(resolvedWp.id, resolvedWp.displayId);
+      clearInlineWpCallbacks(rawWpid);
+    };
+    const cancelPending = () => {
+      pendingCallbacks.onCancel();
+      clearInlineWpCallbacks(rawWpid);
+    };
+
+    const pendingPopover = pendingCallbacks.mode === 'create'
+      ? (
+        <CreateWorkPackageModal
+          anchorEl={chipEl}
+          onCreated={resolvePending}
+          onCancel={cancelPending}
+        />
+      )
+      : (
+        <WorkPackageSearchPopover
+          anchorEl={chipEl}
+          onSelect={resolvePending}
+          onCancel={cancelPending}
+        />
+      );
+
     return (
       <InlineChip ref={setRef}>
-        <WorkPackageSearchPopover
-          onSelect={(selectedWp) => {
-            pendingCallbacks.onSelect(selectedWp.id, selectedWp.displayId);
-            clearInlineWpCallbacks(rawWpid);
-          }}
-          onCancel={() => {
-            pendingCallbacks.onCancel();
-            clearInlineWpCallbacks(rawWpid);
-          }}
-          renderItem={(wp) => <BlockCard workPackage={wp} inDropdown />}
-        />
+        {chipEl && pendingPopover}
       </InlineChip>
     );
   }
@@ -178,7 +196,6 @@ export const InlineWorkPackageChip = ({ inlineContent, contentRef, editor, updat
           <WpPreviewPopover
             // eslint-disable-next-line react-hooks/refs
             anchorEl={chipRef.current}
-            onClose={closePreview}
             {...cardProps}
           >
             <BlockCard workPackage={wp} size="m" linkTitle />

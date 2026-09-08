@@ -1,7 +1,8 @@
 import { useRef, type ReactNode } from 'react';
 import styled from 'styled-components';
-import { defaultWpVariables } from './atoms';
+import { defaultWpVariables, menuSurfaceStyles } from './atoms';
 import { useAnchoredPopover, PopoverPortal } from './anchoredPopover';
+import { FLOATING_Z_INDEX } from '../../utils/zIndex';
 
 const PreviewContainer = styled.div.attrs({
   className: 'op-bn-wp-preview',
@@ -9,12 +10,12 @@ const PreviewContainer = styled.div.attrs({
 })`
   ${defaultWpVariables}
   position: absolute;
-  z-index: 9999;
+  z-index: ${FLOATING_Z_INDEX.preview};
   top: calc(100% + 6px);
   left: 0;
   width: max-content;
   max-width: min(420px, calc(100vw - 24px));
-  background-color: var(--bn-colors-menu-background, #fff);
+  ${menuSurfaceStyles}
   box-shadow: var(--bn-shadow-medium);
   border-radius: var(--bn-border-radius-large);
   padding: var(--spacer-s);
@@ -23,7 +24,6 @@ const PreviewContainer = styled.div.attrs({
 
 export interface WpPreviewPopoverProps {
   anchorEl?:HTMLElement | null;
-  onClose:() => void;
   onMouseEnter?:() => void;
   onMouseLeave?:() => void;
   children:ReactNode;
@@ -32,18 +32,12 @@ export interface WpPreviewPopoverProps {
 // Hover/long-press preview for tiny (xxs) inline chips.
 export const WpPreviewPopover = ({
   anchorEl,
-  onClose,
   onMouseEnter,
   onMouseLeave,
   children,
 }:WpPreviewPopoverProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  useAnchoredPopover({
-    anchorEl,
-    popoverRef: containerRef,
-    placement: 'below',
-    onClose,
-  });
+  useAnchoredPopover({ anchorEl, popoverRef: containerRef, placement: 'below' });
 
   return (
     <PopoverPortal anchorEl={anchorEl}>

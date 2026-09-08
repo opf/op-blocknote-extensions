@@ -11,6 +11,13 @@ This repo is split into two parts:
 
 ## Usage
 
+### Compatibility
+
+| OpenProject version | BlockNote extensions version |
+|---|---|
+| 17.9 | 0.3.0 |
+| 17.8 | 0.2.3 | 
+
 ### Installation
 
 Include the following entry to your _package.json_.
@@ -45,6 +52,16 @@ initializeOpBlockNoteExtensions({
 });
 ```
 
+Optionally, you can pass a `projectId`: the numeric id of the project the edited document belongs to. The first work package created from the document opens on that project; afterwards the form opens on the project the last work package was created in, for as long as the same document stays open. Pass it wherever the surrounding application knows the project, and leave it out where the editor is not rendered in one.
+
+```js
+initializeOpBlockNoteExtensions({
+  baseUrl: 'https://my.openproject.url',
+  locale: 'en',
+  projectId: 42,
+});
+```
+
 Then set up a BlockNote schema extending it with the block and inline specs:
 
 ```tsx
@@ -71,7 +88,10 @@ Build the slash and hash menus:
 const getSlashItems = useCallback(
   async (query: string) =>
     filterSuggestionItems(
-      [...getDefaultReactSlashMenuItems(editor), workPackageSlashMenu(editor)],
+      [
+        ...getDefaultReactSlashMenuItems(editor),
+        ...getOpenProjectSlashMenuItems(editor),
+      ],
       query
     ),
   [editor]
@@ -80,11 +100,20 @@ const getSlashItems = useCallback(
 const { getHashItems, HashWpMenu } = useHashWpMenu(editor);
 ```
 
+`OpenProjectFormattingToolbar` is BlockNote's formatting toolbar with everything this library adds to it - currently a "Create work package" button on a text selection: the selected text names the work package, and the rich link for it takes the text's place in the document once it exists - a card where the selection hands over whole paragraphs, an inline chip within a line of text. It is offered for a selection that reads as a subject, so not for one that already holds a work package. Render it beside the editor and turn off the toolbar BlockNote brings itself, with `formattingToolbar={false}`.
+
+Where the host has toolbar items of its own to place, compose the toolbar by hand with `useCreateWorkPackageFromSelection(editor)` instead: it hands back the button, for the children of `FormattingToolbar`, and the form, which has to stay outside the controller - BlockNote takes the toolbar away as soon as the selection is gone, and a form that was filled in must not go with it.
+
+`getOpenProjectSlashMenuItems` returns every item this library offers: linking an existing work package, and creating a new one through a form and linking it. Both insert a card on an empty line and an inline chip within a line of text.
+
+The create form is built from the work package form endpoint of the API, so the attributes it asks for - and their labels - come from the OpenProject instance: subject, project, type, assignee, plus every other attribute the selected type requires. Attributes the API already has a default for (status and priority, for instance) are left to it and are not shown, required or not.
+
 Include everything in a `BlockNoteView`:
 
 ```tsx
 return (
-  <BlockNoteView editor={editor} slashMenu={false}>
+  <BlockNoteView editor={editor} slashMenu={false} formattingToolbar={false}>
+    <OpenProjectFormattingToolbar />
     <SuggestionMenuController
       triggerCharacter="/"
       getItems={getSlashItems}
@@ -129,10 +158,11 @@ Step 3: Start the development server — `npm run dev`.
 
 ## Components in this library
 
-| Component         | Description                                     |
-| ----------------- | ----------------------------------------------- |
-| WorkPackage block | Search and display elegantly work package links |
-| ...               | ...                                             |
+| Component            | Description                                        |
+| -------------------- | -------------------------------------------------- |
+| WorkPackage block    | Search and display elegantly work package links    |
+| Create work package  | Create a work package from the document and link it |
+| ...                  | ...                                                |
 
 ## Build
 
@@ -156,6 +186,6 @@ This should make sure that the package is available for OpenProject even if runn
 
 ### Releases
 
-Updating the version field in package.json will automatically create a new Git tag with the corresponding version. Pushing this tag to the repository triggers the generation of a new release.
+To publish a new release, update the version in package.json and merge the changes into the release branch. This will generate a new Git tag according to the version and release a new version of the package.
 
-To publish a new release, simply update the version in package.json and merge the changes into the main branch.
+For existing releases, see https://github.com/opf/op-blocknote-extensions/releases/.
