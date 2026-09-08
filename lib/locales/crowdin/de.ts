@@ -16,7 +16,7 @@ export const en = {
       }
     },
     'formattingToolbar': {
-      'createWorkPackage': 'Create work package'
+      'createWorkPackage': "Arbeitspaket erstellen"
     },
     'createWorkPackage': {
       'title': "Neues Arbeitspaket erstellen",
@@ -33,11 +33,11 @@ export const en = {
       'favorites': "Favoriten",
       'clear': "Zurücksetzen",
       'deselect': "Auswahl entfernen",
-      'removeValue': 'Remove {{value}}',
+      'removeValue': "{{value}} entfernen",
       'openOptions': "Optionen anzeigen",
       'closeOptions': "Optionen ausblenden",
       'subjectPlaceholder': "Geben Sie hier den Betreff ein",
-      'subjectClipped': 'The selected text was too long and has been shortened to the first {{limit}} characters.',
+      'subjectClipped': "Der ausgewählte Text war zu lang und wurde auf die ersten {{limit}} Zeichen gekürzt.",
       'projectPlaceholder': "Wählen Sie ein Projekt aus…",
       'loadFailed': "Das Arbeitspaket-Formular konnte nicht geladen werden: {{message}}",
       'notAllowed': "Sie sind nicht berechtigt, Arbeitspakete zu erstellen.",
