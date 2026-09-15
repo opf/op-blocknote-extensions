@@ -13,6 +13,7 @@ const { buildExternals } = JSON.parse(
 export default defineConfig({
   plugins: [react()],
   build: {
+    minify: false,
     lib: {
       entry: {
         'op-blocknote-extensions': path.resolve(__dirname, 'lib/index.ts'),
