@@ -83,6 +83,9 @@ export const en = {
       'blockSizeLabel': "Розмір блоку",
       'chipAriaLabel': "Робочий пакет {{id}}"
     },
+    'preview': {
+      'showAriaLabel': 'Show details of work package {{id}}'
+    },
     'sizes': {
       'xxs': {
         'label': "Крихітний",
