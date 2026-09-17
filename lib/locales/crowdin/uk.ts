@@ -84,7 +84,7 @@ export const en = {
       'chipAriaLabel': "Робочий пакет {{id}}"
     },
     'preview': {
-      'showAriaLabel': 'Show details of work package {{id}}'
+      'showAriaLabel': "Показати деталі для робочого пакету {{id}}"
     },
     'sizes': {
       'xxs': {
