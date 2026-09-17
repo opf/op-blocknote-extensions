@@ -1,10 +1,30 @@
 import { expect } from 'vitest';
-import { delay, http } from 'msw';
+import { delay, http, HttpResponse } from 'msw';
 import { page, userEvent } from 'vitest/browser';
 import { worker } from '../mocks/browser';
+import { createFormFor } from '../mocks/handlers';
+import type { FormRequestBody } from '../mocks/handlers';
 
 export function holdBackFormLoads(ms:number) {
   worker.use(http.post('http://localhost:3000/api/v3/work_packages/form', async () => { await delay(ms); }));
+}
+
+export function withGeneratedSubjectFor(typeHref:string) {
+  worker.use(http.post('http://localhost:3000/api/v3/work_packages/form', async ({ request }) => {
+    const body = await request.json() as FormRequestBody;
+    const form = createFormFor(body);
+    const schema = form._embedded.schema as Record<string, Record<string, unknown>>;
+
+    if (body._links?.type?.href === typeHref) {
+      schema.subject = {
+        ...schema.subject,
+        hasDefault: true,
+        placeholder: 'Automatically generated through type',
+      };
+    }
+
+    return HttpResponse.json(form);
+  }));
 }
 
 export function colorChannelsOf(element:Element):string[] {
@@ -76,11 +96,11 @@ export async function fillRequiredFields(subject:string) {
   await fillRequiredFieldsBesidesSubject();
 }
 
-export async function fillRequiredFieldsBesidesSubject() {
+export async function fillRequiredFieldsBesidesSubject(type = 'Task') {
   await pickProject();
 
   await expect.element(page.getByLabelText('Type *')).toBeVisible();
-  await selectOptionNamed('Type *', 'Task');
+  await selectOptionNamed('Type *', type);
 
   await expect.element(page.getByLabelText('Supervisor *')).toBeVisible();
   await userEvent.click(page.getByLabelText('Supervisor *'));

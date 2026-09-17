@@ -15,6 +15,7 @@ export type FieldKind =
   | 'select'
   | 'typeahead'
   | 'multiSelect'
+  | 'generated'
   | 'unsupported';
 
 export interface AllowedValue {
@@ -43,6 +44,7 @@ export interface FormField {
   integer?:boolean;
   allowedValues?:AllowedValue[];
   allowedValuesHref?:string;
+  searchedInBrowser?:boolean;
 }
 
 export type FieldValue = string | boolean | string[];
@@ -74,6 +76,10 @@ const SCHEMA_META_KEYS = ['_type', '_dependencies', '_attributeGroups', '_links'
 
 const NON_EDITABLE_KEYS = ['id', 'lockVersion', 'createdAt', 'updatedAt', 'author', 'position'];
 
+/*  The endpoint behind these takes a filter, answers 200 and ignores it, so a
+    term has to be matched against the listing it hands out whole.  */
+const UNFILTERED_TYPES = ['CustomField::Hierarchy::Item'];
+
 const KIND_BY_TYPE:Record<string, FieldKind> = {
   'String': 'text',
   'Link': 'text',
@@ -98,7 +104,13 @@ export function readSchemaProperty(
 }
 
 export function labelOfResource(resource:HalResource):string {
-  return resource.name ?? resource.subject ?? resource.value ?? '';
+  return resource.name ?? resource.subject ?? resource.value ?? resource._links?.self?.title ?? '';
+}
+
+function ancestorsOf(resource:HalResource):string[] {
+  const links = resource._links;
+  const named = links?.ancestors ?? (links?.parent ? [links.parent] : []);
+  return named.flatMap((link) => (typeof link.href === 'string' ? [link.href] : []));
 }
 
 export function toAllowedValues(resources:HalResource[]):AllowedValue[] {
@@ -106,12 +118,14 @@ export function toAllowedValues(resources:HalResource[]):AllowedValue[] {
     const href = resource._links?.self?.href;
     if (!href) return [];
 
-    const ancestors = (resource._links?.ancestors ?? [])
-      .flatMap((link) => (typeof link.href === 'string' ? [link.href] : []));
+    const label = labelOfResource(resource);
+    if (!label) return [];
+
+    const ancestors = ancestorsOf(resource);
 
     return [{
       href,
-      label: labelOfResource(resource),
+      label,
       ...(resource.favorited ? { favored: true } : {}),
       ...(ancestors.length > 0 ? { ancestors } : {}),
     }];
@@ -121,6 +135,10 @@ export function toAllowedValues(resources:HalResource[]):AllowedValue[] {
 export function allowedValueOf(field:FormField | undefined, href:string | undefined):AllowedValue | undefined {
   if (!field || !href) return undefined;
   return field.allowedValues?.find((value) => value.href === href);
+}
+
+export function isNested(values:AllowedValue[]):boolean {
+  return values.some((value) => (value.ancestors?.length ?? 0) > 0);
 }
 
 export function listedValues(values:AllowedValue[], expanded:ReadonlySet<string>):ListedValue[] {
@@ -187,8 +205,15 @@ export function allowedValuesHrefOf(property:SchemaProperty):string | undefined 
   return links.href ?? undefined;
 }
 
+// The API fills the attribute in from the type itself (using a configurable pattern) and
+// says so in the placeholder, which is all the form has left to show.
+function isGenerated(property:SchemaProperty):boolean {
+  return property.hasDefault && Boolean(property.placeholder);
+}
+
 export function buildField(key:string, property:SchemaProperty):FormField {
   const multiple = property.type.startsWith('[]');
+  const resourceType = multiple ? property.type.slice('[]'.length) : property.type;
   const field:FormField = {
     key,
     label: property.name,
@@ -199,6 +224,9 @@ export function buildField(key:string, property:SchemaProperty):FormField {
     ...(property.maxLength ? { maxLength: property.maxLength } : {}),
   };
 
+  // Nothing to fill in and nothing to ask for: the note stands in for the control.
+  if (isGenerated(property)) return { ...field, kind: 'generated', required: false };
+
   // An href belongs under `_links` even when the schema leaves the location out.
   const allowedValues = allowedValuesOf(property);
   if (allowedValues) {
@@ -207,7 +235,13 @@ export function buildField(key:string, property:SchemaProperty):FormField {
 
   const allowedValuesHref = allowedValuesHrefOf(property);
   if (allowedValuesHref) {
-    return { ...field, kind: multiple ? 'multiSelect' : 'typeahead', isLink: true, allowedValuesHref };
+    return {
+      ...field,
+      kind: multiple ? 'multiSelect' : 'typeahead',
+      isLink: true,
+      allowedValuesHref,
+      ...(UNFILTERED_TYPES.includes(resourceType) ? { searchedInBrowser: true } : {}),
+    };
   }
 
   // Several values of a kind with no picker: nothing but a notice.
@@ -227,9 +261,15 @@ export function fieldFor(schema:WorkPackageSchema | undefined, key:string):FormF
 }
 
 // Left out of the form: the default the API put into the payload is submitted as
-// it is, required attribute or not.
+// it is, required attribute or not. A generated one stays as a note, which is
+// also the one thing worth showing of an attribute that may not be written.
 function isOffered(property:SchemaProperty):boolean {
-  return property.writable && !property.hasDefault;
+  return isGenerated(property) || (property.writable && !property.hasDefault);
+}
+
+/** Whether the user fills the field in, so its value is held on to and submitted. */
+export function writable(field:FormField):boolean {
+  return field.kind !== 'unsupported' && field.kind !== 'generated';
 }
 
 export function fixedFields(
@@ -390,7 +430,7 @@ function hangsOnType(key:string):boolean {
 }
 
 function heldValue(field:FormField | undefined, value:FieldValue):FieldValue | undefined {
-  if (!field || field.kind === 'unsupported') return undefined;
+  if (!field || !writable(field)) return undefined;
   if (field.kind === 'checkbox') return typeof value === 'boolean' ? value : undefined;
 
   if (field.kind === 'multiSelect') {
@@ -455,7 +495,7 @@ export function buildCreatePayload(
   const links:Record<string, HalLink | HalLink[]> = { ...basePayload._links };
 
   for (const field of fields) {
-    if (field.kind === 'unsupported') continue;
+    if (!writable(field)) continue;
 
     const value = values[field.key];
     if (field.kind === 'multiSelect') {

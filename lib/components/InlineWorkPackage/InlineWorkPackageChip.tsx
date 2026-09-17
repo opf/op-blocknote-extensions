@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next';
 import { formatWorkPackageId } from '../../utils/id';
 import { useIsNodeInSelection } from '../../hooks/useIsNodeInSelection';
 import { useSuppressFormattingToolbar } from '../../hooks/useSuppressFormattingToolbar';
+import { useTapActivation } from '../../utils/tapActivation';
 import type { BlockNoteEditor } from '@blocknote/core';
 
 export interface InlineWorkPackageChipProps {
@@ -61,12 +62,17 @@ export const InlineWorkPackageChip = ({ inlineContent, contentRef, editor, updat
   const chipRef = useRef<HTMLElement | null>(null);
   const [chipEl, setChipEl] = useState<HTMLElement | null>(null);
 
-  const preview = useWorkPackagePreview({ enabled: size === 'xxs', suppressed: isSelected });
-  const { previewOpen, closePreview, wasLongPress, triggerProps, cardProps } = preview;
+  const preview = useWorkPackagePreview({
+    enabled: size === 'xxs',
+    suppressed: isSelected,
+    // The indicator shows the preview instead of the options menu, not over it.
+    onOpen: () => setIsSelected(false),
+  });
+  const { previewOpen, closePreview, triggerProps, cardProps } = preview;
 
   const isEditorSelected = useIsNodeInSelection(chipRef, editor);
 
-  useSuppressFormattingToolbar(editor, isSelected);
+  useSuppressFormattingToolbar(editor, isSelected || previewOpen);
 
   const setRef = (node:HTMLElement | null) => {
     chipRef.current = node;
@@ -81,28 +87,37 @@ export const InlineWorkPackageChip = ({ inlineContent, contentRef, editor, updat
     editor.getExtension('formattingToolbar')?.store?.setState(false);
   };
 
-  const handleWorkPackageClick = (e:React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    // A long press already opened the preview; swallow the trailing click.
-    if (wasLongPress()) return;
+  const toggleOptions = () => {
     closePreview();
     setIsSelected((prev) => !prev);
     selectWorkPackageNode();
   };
 
-  // Close the options popover and long-press preview when the user taps outside the chip
+  const tapProps = useTapActivation();
+  // The closure is handed to the element, not run while rendering.
+  // eslint-disable-next-line react-hooks/refs
+  const onChipActivation = tapProps((event) => {
+    event?.preventDefault();
+    event?.stopPropagation();
+    toggleOptions();
+  });
+
+  // Close the options popover and the preview when the user taps outside the chip
   useEffect(() => {
     if (!isSelected && !previewOpen) return;
-    const onClickOutside = (e:MouseEvent) => {
+    const onPressOutside = (e:Event) => {
       if (chipRef.current && !chipRef.current.contains(e.target as Node)) {
         setIsSelected(false);
         closePreview();
       }
     };
-    document.addEventListener('mousedown', onClickOutside);
-    return () => document.removeEventListener('mousedown', onClickOutside);
+    // Touch as well: a tap another element answers never becomes a mousedown.
+    document.addEventListener('mousedown', onPressOutside);
+    document.addEventListener('touchstart', onPressOutside);
+    return () => {
+      document.removeEventListener('mousedown', onPressOutside);
+      document.removeEventListener('touchstart', onPressOutside);
+    };
   }, [isSelected, previewOpen, closePreview]);
 
   const optionsPopover = (
@@ -177,18 +192,20 @@ export const InlineWorkPackageChip = ({ inlineContent, contentRef, editor, updat
   if (wpid && wp) {
     // Hidden while the options menu is open so the two popovers never stack.
     const showPreview = size === 'xxs' && previewOpen && !isSelected;
+    const chipLabel = t('options.chipAriaLabel', { id: formatWorkPackageId(wp.displayId) });
+    const hasIndicator = preview.indicatorProps !== undefined;
 
     return (
       <InlineChip
         data-drag-handle
-        role="button"
-        aria-label={t('options.chipAriaLabel', { id: formatWorkPackageId(wp.displayId) })}
+        role={hasIndicator ? undefined : 'button'}
+        aria-label={hasIndicator ? undefined : chipLabel}
         ref={setRef}
         selected={isSelected || isEditorSelected}
         {...triggerProps}
-        onClick={handleWorkPackageClick}
+        {...onChipActivation}
       >
-        {size === 'xxs' && <WpChipXXS wp={wp} />}
+        {size === 'xxs' && <WpChipXXS wp={wp} preview={preview} actionLabel={chipLabel} />}
         {size === 'xs' && <WpChipXS wp={wp} />}
         {size === 's' && <WpChipS wp={wp} />}
 
@@ -219,7 +236,7 @@ export const InlineWorkPackageChip = ({ inlineContent, contentRef, editor, updat
         anchorEl={chipRef.current}
         selected={isSelected || isEditorSelected}
         preview={preview}
-        onClick={handleWorkPackageClick}
+        onActivation={onChipActivation}
         optionsPopover={isSelected && optionsPopover}
       />
     );

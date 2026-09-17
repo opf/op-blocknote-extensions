@@ -162,6 +162,9 @@ export function fetchTypes():Promise<TypeCollection> {
 /*  Beyond one page of them a listing is searched rather than browsed.  */
 const ALLOWED_VALUES_PAGE_SIZE = 100;
 
+/*  What the API reads as "not a page of them, all of them".  */
+const UNPAGINATED_PAGE_SIZE = -1;
+
 /**
  * Asks the API which attributes a new work package needs: an empty payload yields
  * the bare schema, sending the project back its types, the type its statuses.
@@ -174,6 +177,38 @@ export function createWorkPackage(payload:WorkPackagePayload):Promise<WorkPackag
   return post<WorkPackage>('/api/v3/work_packages', payload);
 }
 
+/*  The project picker's endpoint is guarded by the very `add_work_packages` permission
+ *  the create form needs, so its refusal is the permission answer.  */
+const CREATE_PERMISSION_PROBE = '/api/v3/work_packages/available_projects?pageSize=1';
+
+let createPermission = false;
+let createPermissionProbe:Promise<boolean> = Promise.resolve(createPermission);
+
+/** Sent by initialization, before any entry point to the create form is drawn. */
+export function probeCreateWorkPackagePermission():Promise<boolean> {
+  createPermissionProbe = get(CREATE_PERMISSION_PROBE)
+    .then(() => true)
+    // Only a refusal speaks for the permission: anything else is an instance in trouble,
+    // which the create form goes on reporting as it did before.
+    .catch((error:unknown) => !(error instanceof OpenProjectApiError && error.responseStatus === 403))
+    .then((allowed) => {
+      createPermission = allowed;
+      return allowed;
+    });
+
+  return createPermissionProbe;
+}
+
+/** Denied until the probe answers, so no entry point is drawn on an unknown permission. */
+export function canCreateWorkPackages():boolean {
+  return createPermission;
+}
+
+/** Resolves with that probe's answer, for entry points drawn while it is still in flight. */
+export function whenCreateWorkPackagePermissionKnown():Promise<boolean> {
+  return createPermissionProbe;
+}
+
 type HalFilter = Record<string, { operator:string; values:string[] }>;
 
 const TYPEAHEAD_FILTER = (query:string):HalFilter => ({ typeahead: { operator: '**', values: [query] } });
@@ -181,7 +216,11 @@ const FAVORED_FILTER:HalFilter = { favored: { operator: '=', values: ['t'] } };
 
 const HIERARCHY_ORDER = JSON.stringify([['lft', 'asc']]);
 
-function withQuery(href:string, added:HalFilter[], nested:boolean):string {
+function withQuery(
+  href:string,
+  added:HalFilter[],
+  { nested, notServerSideFilterable }:AllowedValuesQuery
+):string {
   const separator = href.indexOf('?');
   const path = separator === -1 ? href : href.slice(0, separator);
   const params = new URLSearchParams(separator === -1 ? '' : href.slice(separator + 1));
@@ -197,7 +236,10 @@ function withQuery(href:string, added:HalFilter[], nested:boolean):string {
   }
 
   if (nested && !params.has('sortBy')) params.set('sortBy', HIERARCHY_ORDER);
-  if (!params.has('pageSize')) params.set('pageSize', String(ALLOWED_VALUES_PAGE_SIZE));
+  if (!params.has('pageSize')) {
+    const size = notServerSideFilterable ? UNPAGINATED_PAGE_SIZE : ALLOWED_VALUES_PAGE_SIZE;
+    params.set('pageSize', String(size));
+  }
 
   return `${path}?${params.toString()}`;
 }
@@ -216,6 +258,8 @@ function assertApiHref(href:string):void {
 export interface AllowedValuesQuery {
   favoredOnly?:boolean;
   nested?:boolean;
+  /** Whether the endpoint narrows nothing itself: the listing is then asked for whole and matched here. */
+  notServerSideFilterable?:boolean;
 }
 
 /**
@@ -226,24 +270,25 @@ export interface AllowedValuesQuery {
 export async function fetchAllowedValues(
   href:string,
   query = '',
-  { favoredOnly = false, nested = false }:AllowedValuesQuery = {}
+  { favoredOnly = false, nested = false, notServerSideFilterable = false }:AllowedValuesQuery = {}
 ):Promise<{ resources:HalResource[]; filtered:boolean }> {
   assertApiHref(href);
 
+  const listing = { nested, notServerSideFilterable };
   const kept = favoredOnly ? [FAVORED_FILTER] : [];
   const trimmedQuery = query.trim();
 
   if (trimmedQuery) {
     try {
       const narrowing = [...kept, TYPEAHEAD_FILTER(trimmedQuery)];
-      return { resources: await listValues(withQuery(href, narrowing, nested)), filtered: true };
+      return { resources: await listValues(withQuery(href, narrowing, listing)), filtered: true };
     } catch (error) {
       if (!(error instanceof OpenProjectApiError) || error.responseStatus !== 400) throw error;
       console.warn('[OpenProjectApi] typeahead filter rejected, retrying unfiltered:', error);
     }
   }
 
-  return { resources: await listValues(withQuery(href, kept, nested)), filtered: false };
+  return { resources: await listValues(withQuery(href, kept, listing)), filtered: false };
 }
 
 /** Follows the `allowedValues` link of a schema attribute, narrowed to the resource of the given id. */
@@ -254,7 +299,7 @@ export async function fetchAllowedValueById(
   assertApiHref(href);
 
   const data = await get<HalCollection<HalResource>>(
-    withQuery(href, [{ id: { operator: '=', values: [String(id)] } }], false)
+    withQuery(href, [{ id: { operator: '=', values: [String(id)] } }], {})
   );
   return data._embedded?.elements?.[0];
 }
