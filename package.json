@@ -57,7 +57,7 @@
     "@blocknote/react": "^0.51.3",
     "@vitejs/plugin-react": "^6.1.1",
     "@vitest/browser-playwright": "^4.1.11",
-    "@vitest/coverage-v8": "^4.1.10",
+    "@vitest/coverage-v8": "^5.0.0",
     "@vitest/eslint-plugin": "^1.6.27",
     "eslint": "^10.9.1",
     "eslint-plugin-react-hooks": "^7.1.1",
