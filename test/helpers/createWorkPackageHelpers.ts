@@ -1,13 +1,34 @@
 import { expect, onTestFinished } from 'vitest';
-import { delay, http } from 'msw';
+import { expect } from 'vitest';
+import { delay, http, HttpResponse } from 'msw';
 import { page, userEvent } from 'vitest/browser';
 import { worker } from '../mocks/browser';
+import { createFormFor } from '../mocks/handlers';
+import type { FormRequestBody } from '../mocks/handlers';
 
 const PHONE = { width: 390, height: 640 };
 const DESKTOP = { width: 800, height: 600 };
 
 export function holdBackFormLoads(ms:number) {
   worker.use(http.post('http://localhost:3000/api/v3/work_packages/form', async () => { await delay(ms); }));
+}
+
+export function withGeneratedSubjectFor(typeHref:string) {
+  worker.use(http.post('http://localhost:3000/api/v3/work_packages/form', async ({ request }) => {
+    const body = await request.json() as FormRequestBody;
+    const form = createFormFor(body);
+    const schema = form._embedded.schema as Record<string, Record<string, unknown>>;
+
+    if (body._links?.type?.href === typeHref) {
+      schema.subject = {
+        ...schema.subject,
+        hasDefault: true,
+        placeholder: 'Automatically generated through type',
+      };
+    }
+
+    return HttpResponse.json(form);
+  }));
 }
 
 export function colorChannelsOf(element:Element):string[] {
