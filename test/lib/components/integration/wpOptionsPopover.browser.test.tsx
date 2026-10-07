@@ -43,7 +43,7 @@ function ChipWrapper({ initialSize, wpid = '123' }:{
 }
 
 async function waitForResolvedChip() {
-  await expect.element(page.getByText('#123')).toBeVisible();
+  await expect.element(page.getByText('#123', { exact: true })).toBeVisible();
 }
 
 async function openPopover() {
