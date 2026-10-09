@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { MockInstance } from 'vitest';
 import {
+  avatarUrlOf,
   canCreateWorkPackages,
   createWorkPackage,
   fetchAllowedValues,
@@ -10,11 +12,15 @@ import {
   probeCreateWorkPackagePermission,
   initOpenProjectApi,
   linkToNewWorkPackage,
+  linkToUser,
   linkToWorkPackage,
   OpenProjectApiError,
   parseWorkPackageUrl,
-  searchWorkPackages
+  searchMentionableUsers,
+  searchWorkPackages,
+  userApiPath,
 } from '../../../lib/services/openProjectApi';
+import { initEditorContext } from '../../../lib/services/editorContext';
 
 function mockResponse(props:Partial<Response>):Response {
   return props as Response;
@@ -732,6 +738,77 @@ describe('openProjectApi', () => {
       initOpenProjectApi({ baseUrl: 'https://example.com' });
       expect(linkToNewWorkPackage('42')).toBe('https://example.com/projects/42/work_packages/new');
       expect(linkToNewWorkPackage()).toBe('https://example.com/work_packages/new');
+    });
+  });
+
+  describe('user links', () => {
+    it('links to the user page, and loads the avatar through the proxy', () => {
+      initOpenProjectApi({ baseUrl: 'https://example.com/', proxyUrl: 'https://proxy.example.com' });
+
+      expect(linkToUser(5)).toBe('https://example.com/users/5');
+      expect(userApiPath('5')).toBe('/api/v3/users/5');
+      expect(avatarUrlOf(userApiPath(5))).toBe('https://proxy.example.com/api/v3/users/5/avatar');
+    });
+
+    it('has no avatar picture for groups and placeholder users', () => {
+      expect(avatarUrlOf('/api/v3/groups/3')).toBeUndefined();
+      expect(avatarUrlOf('/api/v3/placeholder_users/3')).toBeUndefined();
+      expect(avatarUrlOf(undefined)).toBeUndefined();
+    });
+  });
+
+  describe('searchMentionableUsers', () => {
+    const anna = { id: 7, name: 'Anna Kovalenko', login: 'anna', _links: { self: { href: '/api/v3/users/7' } } };
+    let fetchSpy:MockInstance<typeof fetch>;
+
+    const requestedUrl = () => new URL(calledUrl(fetchSpy.mock.calls));
+    const filtersOf = (url:URL) => JSON.parse(url.searchParams.get('filters')!) as unknown[];
+
+    beforeEach(() => {
+      initOpenProjectApi({ baseUrl: 'http://localhost:3000' });
+      fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(mockResponse({
+        ok: true,
+        json: async () => ({ _embedded: { elements: [anna] } }),
+      }));
+    });
+
+    afterEach(() => {
+      fetchSpy.mockRestore();
+      initEditorContext({});
+    });
+
+    it('asks for active users of the document project matching the query, sorted by name', async () => {
+      initEditorContext({ projectId: 12 });
+      await searchMentionableUsers('jud');
+
+      const url = requestedUrl();
+      expect(url.pathname).toBe('/api/v3/principals');
+      expect(filtersOf(url)).toEqual([
+        { status: { operator: '!', values: ['3'] } },
+        { type: { operator: '=', values: ['User'] } },
+        { member: { operator: '=', values: ['12'] } },
+        { typeahead: { operator: '**', values: ['jud'] } },
+      ]);
+      expect(url.searchParams.get('sortBy')).toBe('[["name","asc"]]');
+    });
+
+    it('asks for at most 5 people', async () => {
+      await searchMentionableUsers('jud');
+
+      expect(requestedUrl().searchParams.get('pageSize')).toBe('5');
+    });
+
+    it('lists users without a project or a query', async () => {
+      await searchMentionableUsers('  ');
+
+      expect(filtersOf(requestedUrl())).toEqual([
+        { status: { operator: '!', values: ['3'] } },
+        { type: { operator: '=', values: ['User'] } },
+      ]);
+    });
+
+    it('keeps only the id and the name of each user', async () => {
+      expect(await searchMentionableUsers('ann')).toEqual([{ id: 7, name: 'Anna Kovalenko' }]);
     });
   });
 
