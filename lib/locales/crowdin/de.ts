@@ -83,6 +83,9 @@ export const en = {
       'blockSizeLabel': "Blockgröße",
       'chipAriaLabel': "Arbeitspaket {{id}}"
     },
+    'preview': {
+      'showAriaLabel': 'Show details of work package {{id}}'
+    },
     'sizes': {
       'xxs': {
         'label': "Winzig",
