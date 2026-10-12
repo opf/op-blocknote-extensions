@@ -100,5 +100,10 @@ export const en = {
     'spinner': {
       'ariaLabel': 'Loading'
     },
+    'headingLink': {
+      'copy': 'Copy link to heading',
+      'copied': 'Link copied',
+      'failed': 'Could not copy link'
+    },
   }
 };

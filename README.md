@@ -79,8 +79,10 @@ type EditorType = typeof schema.BlockNoteEditor;
 Create the editor:
 
 ```tsx
-const editor = useCreateBlockNote({ schema });
+const editor = useCreateBlockNote({ schema, extensions: [HeadingLinkExtension] });
 ```
+
+`HeadingLinkExtension` puts a button after every heading that copies a link to it (`#heading-<block id>`). Opening such a link scrolls the editor to the heading, opening any collapsed toggles around it, and keeps it in view while the content above is still loading, until the user starts interacting. The anchor is the block id, so links survive renaming a heading and nothing is added to the stored document. Leave the extension out where headings should not be linkable.
 
 Build the slash menu:
 
@@ -143,6 +145,8 @@ This project uses `styledComponents` to define styles. This means that styles ar
 </ShadowDomWrapper>
 ```
 
+`HeadingLinkExtension` is the exception. Its buttons are rendered by ProseMirror, outside React, so it adds its own stylesheet to the document or shadow root the editor lives in.
+
 ### To run locally with valid API requests to an OpenProject instance
 
 Step 1: Copy `.env.example` to `.env` and fill in:
@@ -160,6 +164,7 @@ Step 3: Start the development server — `npm run dev`.
 | -------------------- | -------------------------------------------------- |
 | WorkPackage block    | Search and display elegantly work package links    |
 | Create work package  | Create a work package from the document and link it |
+| Heading links        | Copy a link to a heading and open the document at it |
 | ...                  | ...                                                |
 
 ## Build

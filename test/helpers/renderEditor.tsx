@@ -33,12 +33,14 @@ interface EditorOptions {
   schema?:any;
   editable?:boolean;
   initialContent?:any[];
+  extensions?:any[];
 }
 
-function Editor({ onEditor, schema, editable = true, initialContent }:EditorOptions) {
+function Editor({ onEditor, schema, editable = true, initialContent, extensions }:EditorOptions) {
   const editor = useCreateBlockNote({
     schema: schema ?? defaultSchema,
     ...(initialContent ? { initialContent } : {}),
+    ...(extensions ? { extensions } : {}),
   });
   onEditor?.(editor);
 

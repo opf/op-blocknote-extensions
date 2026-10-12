@@ -14,3 +14,4 @@ export { OpenProjectHashMenu, createHashWpMenuComponent, isHashWpQuery, useHashW
 export type { HashMenuItem } from './components/HashMenu';
 export { useWorkPackageSearch } from './hooks/useWorkPackageSearch';
 export type { WorkPackage } from './openProjectTypes';
+export { HeadingLinkExtension } from './plugins/headingLinkExtension';

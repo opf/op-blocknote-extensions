@@ -18,6 +18,21 @@ export interface TapActivationProps {
   onClick:(event:ReactMouseEvent) => void;
 }
 
+interface TouchLike {
+  target:EventTarget | null;
+  currentTarget:EventTarget | null;
+  changedTouches:Readonly<Record<number, { clientX:number; clientY:number } | undefined>>;
+  timeStamp:number;
+  preventDefault():void;
+}
+
+interface TapState {
+  startedAt:{ x:number; y:number } | null;
+  activatedAt:number;
+}
+
+const createTapState = ():TapState => ({ startedAt: null, activatedAt: Number.NEGATIVE_INFINITY });
+
 /*
  * Activates an element from the touch itself instead of from the click iOS
  * Safari synthesises afterwards: it holds that click back until the second tap
@@ -29,38 +44,51 @@ export interface TapActivationProps {
  * bubbles up the React tree to the element it was rendered from, and a nested
  * link or button answers for itself - neither is a tap on the element.
  */
-export function useTapActivation():(activate:TapAction) => TapActivationProps {
-  const startedAt = useRef<{ x:number; y:number } | null>(null);
-  const activatedAt = useRef(Number.NEGATIVE_INFINITY);
-
-  const isOwnTouch = (event:ReactTouchEvent) => {
-    const target = event.target;
-    if (!(target instanceof Element)) return false;
-    if (!event.currentTarget.contains(target)) return false;
+function tapHandlers<ClickEvent extends { timeStamp:number }>(
+  state:{ current:TapState },
+  activate:(event?:ClickEvent) => void,
+) {
+  const isOwnTouch = (event:TouchLike) => {
+    const { target, currentTarget } = event;
+    if (!(target instanceof Element) || !(currentTarget instanceof Element)) return false;
+    if (!currentTarget.contains(target)) return false;
 
     const nested = target.closest('a, button');
-    return !nested || nested === event.currentTarget;
+    return !nested || nested === currentTarget;
   };
 
-  return (activate:TapAction) => ({
-    onTouchStart: (event:ReactTouchEvent) => {
+  return {
+    onTouchStart: (event:TouchLike) => {
       const touch = event.changedTouches[0];
-      startedAt.current = touch && isOwnTouch(event) ? { x: touch.clientX, y: touch.clientY } : null;
+      state.current.startedAt = touch && isOwnTouch(event) ? { x: touch.clientX, y: touch.clientY } : null;
     },
-    onTouchEnd: (event:ReactTouchEvent) => {
-      const start = startedAt.current;
+    onTouchEnd: (event:TouchLike) => {
+      const start = state.current.startedAt;
       const touch = event.changedTouches[0];
-      startedAt.current = null;
+      state.current.startedAt = null;
       if (!start || !touch || !isOwnTouch(event)) return;
       if (Math.hypot(touch.clientX - start.x, touch.clientY - start.y) > TAP_MOVE_TOLERANCE) return;
 
       event.preventDefault();
-      activatedAt.current = event.timeStamp;
+      state.current.activatedAt = event.timeStamp;
       activate();
     },
-    onClick: (event:ReactMouseEvent) => {
-      if (event.timeStamp - activatedAt.current < GHOST_CLICK_WINDOW) return;
+    onClick: (event:ClickEvent) => {
+      if (event.timeStamp - state.current.activatedAt < GHOST_CLICK_WINDOW) return;
       activate(event);
     },
-  });
+  };
+}
+
+export function useTapActivation():(activate:TapAction) => TapActivationProps {
+  const state = useRef(createTapState());
+  return (activate:TapAction) => tapHandlers(state, activate);
+}
+
+// For elements ProseMirror renders outside React, such as decoration widgets.
+export function bindTapActivation(element:HTMLElement, activate:() => void) {
+  const handlers = tapHandlers<MouseEvent>({ current: createTapState() }, activate);
+  element.addEventListener('touchstart', handlers.onTouchStart, { passive: true });
+  element.addEventListener('touchend', handlers.onTouchEnd);
+  element.addEventListener('click', handlers.onClick);
 }

@@ -16,6 +16,7 @@ import {
   getOpenProjectSlashMenuItems,
   OpenProjectFormattingToolbar,
   OpenProjectHashMenu,
+  HeadingLinkExtension,
 } from '../lib';
 import './fetchOverride';
 
@@ -44,7 +45,7 @@ function buildSlashMenuItems(editor:EditorType) {
 }
 
 export default function App() {
-  const editor = useCreateBlockNote({ schema });
+  const editor = useCreateBlockNote({ schema, extensions: [HeadingLinkExtension] });
 
   const getSlashItems = useCallback(
     // eslint-disable-next-line @typescript-eslint/require-await
