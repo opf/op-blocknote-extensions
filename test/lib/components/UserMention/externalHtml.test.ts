@@ -6,12 +6,23 @@ import {
   parseUserMentionExternalHTML,
 } from '../../../../lib/components/UserMention/externalHtml';
 
-const judith = { userId: '5', name: 'Judith Roth' };
+const judith = { userId: '5', name: 'Judith Roth', mentionedBy: '' };
+const judithByKarl = { ...judith, mentionedBy: '4' };
 
 describe('user mention external HTML', () => {
   it('builds the canonical tag', () => {
     expect(userMentionTag(judith))
       .toBe('<mention class="mention" data-id="5" data-type="user" data-text="@Judith Roth">@Judith Roth</mention>');
+  });
+
+  it('appends who mentioned as the last attribute', () => {
+    expect(userMentionTag(judithByKarl))
+      .toBe('<mention class="mention" data-id="5" data-type="user" data-text="@Judith Roth" data-mentioned-by="4">@Judith Roth</mention>');
+  });
+
+  it('escapes who mentioned like the other attributes', () => {
+    expect(userMentionTag({ ...judith, mentionedBy: '4"><x' }))
+      .toContain('data-mentioned-by="4&quot;&gt;&lt;x">');
   });
 
   it('wraps the tag as text for the stored markdown', () => {
@@ -26,6 +37,18 @@ describe('user mention external HTML', () => {
       .toEqual(judith);
   });
 
+  it('parses who mentioned back from its own wrapper', () => {
+    expect(parseUserMentionExternalHTML(buildUserMentionStoredDOM(judithByKarl, document)))
+      .toEqual(judithByKarl);
+  });
+
+  it('parses who mentioned from a bare mention tag', () => {
+    const host = document.createElement('div');
+    host.innerHTML = userMentionTag(judithByKarl);
+
+    expect(parseUserMentionExternalHTML(host.firstElementChild as HTMLElement)).toEqual(judithByKarl);
+  });
+
   it('parses a mention copied from a CKEditor field', () => {
     const host = document.createElement('div');
     host.innerHTML = userMentionTag(judith);
@@ -34,7 +57,7 @@ describe('user mention external HTML', () => {
   });
 
   it('reads back a name with quotes, ampersands and angle brackets from its own tag', () => {
-    const ann = { userId: '9', name: 'Ann "A&B" <Lee>' };
+    const ann = { userId: '9', name: 'Ann "A&B" <Lee>', mentionedBy: '' };
     const host = document.createElement('div');
     host.innerHTML = userMentionTag(ann);
 

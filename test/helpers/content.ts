@@ -4,8 +4,8 @@ export function chipContent(wpid:string, size = 's') {
   return { type: INLINE_WP_TYPE, props: { wpid, size } };
 }
 
-export function mentionContent(userId:string, name:string) {
-  return { type: USER_MENTION_TYPE, props: { userId, name } };
+export function mentionContent(userId:string, name:string, mentionedBy = '') {
+  return { type: USER_MENTION_TYPE, props: { userId, name, mentionedBy } };
 }
 
 export function textContent(value:string) {

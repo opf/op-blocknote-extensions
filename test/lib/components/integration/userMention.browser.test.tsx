@@ -4,6 +4,7 @@ import { renderEditor, renderEditorWithHandle } from '../../../helpers/renderEdi
 import { mentionContent, paragraphWith } from '../../../helpers/content';
 import { mentionsIn } from '../../../helpers/headlessEditor';
 import { withNavigationPrevented } from '../../../helpers/editorHelpers';
+import { signInAs } from '../../../helpers/session';
 
 const anna = mentionContent('7', 'Anna Kovalenko');
 
@@ -45,6 +46,18 @@ describe('User mention', () => {
 
     editor.setTextCursorPosition(editor.document[0], 'end');
     editor.pasteHTML('<p><mention class="mention" data-id="8" data-type="user" data-text="@Peter Lang">@Peter Lang</mention></p>');
-    expect(mentionsIn(editor)).toEqual([{ userId: '8', name: 'Peter Lang' }]);
+    expect(mentionsIn(editor)).toEqual([mentionContent('8', 'Peter Lang').props]);
+  });
+
+  it('records the user who pastes a mention instead of the one who first mentioned', async () => {
+    signInAs(4);
+    const editor = await renderEditorWithHandle({ initialContent: [paragraphWith('Hello')] });
+    await expect.element(page.getByText('Hello')).toBeVisible();
+
+    editor.setTextCursorPosition(editor.document[0], 'end');
+    editor.pasteHTML('<p><mention class="mention" data-id="8" data-type="user" data-text="@Peter Lang" data-mentioned-by="99">@Peter Lang</mention></p>');
+
+    expect(mentionsIn(editor)).toEqual([mentionContent('8', 'Peter Lang', '4').props]);
+    expect(await editor.blocksToHTMLLossy(editor.document)).toContain('data-mentioned-by="4">@Peter Lang</mention>');
   });
 });

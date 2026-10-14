@@ -62,6 +62,16 @@ initializeOpBlockNoteExtensions({
 });
 ```
 
+Optionally, you can pass a `currentUserId`: the id of the user editing the document. With `UserMentionAuthorExtension` registered on the editor (see below), every user mention inserted there - picked, pasted or duplicated - is stored with a `data-mentioned-by` attribute naming that user, while moved mentions and those from collaborators keep their author. Without a `currentUserId`, inserted mentions get no author.
+
+```js
+initializeOpBlockNoteExtensions({
+  baseUrl: 'https://my.openproject.url',
+  locale: 'en',
+  currentUserId: 4,
+});
+```
+
 Then set up a BlockNote schema extending it with the block and inline specs:
 
 ```tsx
@@ -77,10 +87,10 @@ const schema = BlockNoteSchema.create().extend({
 type EditorType = typeof schema.BlockNoteEditor;
 ```
 
-Create the editor:
+Create the editor with `UserMentionAuthorExtension`, which BlockNote does not pick up from the inline content specs:
 
 ```tsx
-const editor = useCreateBlockNote({ schema });
+const editor = useCreateBlockNote({ schema, extensions: [UserMentionAuthorExtension] });
 ```
 
 Build the slash menu:

@@ -5,6 +5,7 @@ export const userMentionConfig = {
   propSchema: {
     userId: { default: '' },
     name: { default: '' },
+    mentionedBy: { default: '' },
   },
   content: 'none' as const,
 };

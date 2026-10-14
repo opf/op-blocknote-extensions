@@ -1,9 +1,13 @@
 import { BlockNoteEditor, BlockNoteSchema } from '@blocknote/core';
+import { withCollaboration } from '@blocknote/core/yjs';
 import { NodeSelection, TextSelection } from 'prosemirror-state';
+import { onTestFinished } from 'vitest';
+import * as Y from 'yjs';
 import {
   openProjectWorkPackageBlockSpec,
   openProjectWorkPackageInlineSpec,
   openProjectUserMentionSpec,
+  UserMentionAuthorExtension,
 } from '../../lib';
 import type { AnyEditor } from '../../lib/editorTypes';
 import { INLINE_WP_TYPE, USER_MENTION_TYPE } from '../../lib/utils/nodeTypes';
@@ -24,8 +28,38 @@ export interface InlineNode {
   props?:Record<string, unknown>;
 }
 
+const extensions = [UserMentionAuthorExtension];
+
 export function createHeadlessEditorWithBlocks(blocks:unknown[]) {
-  return BlockNoteEditor.create({ schema, initialContent: blocks as never });
+  return BlockNoteEditor.create({ schema, extensions, initialContent: blocks as never });
+}
+
+// ProseMirror plugins only run once the editor is mounted.
+export function mountHeadlessEditor<Editor extends AnyEditor>(editor:Editor):Editor {
+  editor.mount(document.createElement('div'));
+  onTestFinished(() => editor.unmount());
+  return editor;
+}
+
+// Two editors on separate Y.Docs that only exchange changes when `sync` is called,
+// so a test controls what the editor is doing while a collaborator's change arrives.
+export function createCollaborativeHeadlessEditors() {
+  const documents = [new Y.Doc(), new Y.Doc()];
+  const editors = documents.map((document) => {
+    const editor = BlockNoteEditor.create(withCollaboration({
+      schema,
+      extensions,
+      collaboration: { fragment: document.getXmlFragment('document-store'), user: { name: 'Collaborator', color: '#000000' } },
+    }));
+    return mountHeadlessEditor(editor);
+  });
+
+  const sync = () => {
+    Y.applyUpdate(documents[1], Y.encodeStateAsUpdate(documents[0]));
+    Y.applyUpdate(documents[0], Y.encodeStateAsUpdate(documents[1]));
+  };
+
+  return { editors, sync };
 }
 
 export function createHeadlessEditor(content:unknown[] | string) {

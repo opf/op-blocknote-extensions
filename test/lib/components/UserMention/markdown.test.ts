@@ -29,6 +29,11 @@ describe('user mention markdown export', () => {
     ])).toBe(`* ${judith}\n\n**Owner** ${judith}`);
   });
 
+  it('records who mentioned in the tag', async () => {
+    expect(await markdownOf([paragraphWith(mentionContent('5', 'Judith Roth', '4'))]))
+      .toBe('<mention class="mention" data-id="5" data-type="user" data-text="@Judith Roth" data-mentioned-by="4">@Judith Roth</mention>');
+  });
+
   it('escapes a name so OpenProject reads the same name back', async () => {
     expect(await markdownOf([paragraphWith(mentionContent('9', 'Ann "A&B" <Lee>'))]))
       .toBe('<mention class="mention" data-id="9" data-type="user" data-text="@Ann &quot;A&amp;B&quot; &lt;Lee&gt;">@Ann "A&amp;B" &lt;Lee&gt;</mention>');

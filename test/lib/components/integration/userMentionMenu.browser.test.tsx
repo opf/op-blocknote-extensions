@@ -6,6 +6,7 @@ import { renderEditor, renderEditorWithHandle } from '../../../helpers/renderEdi
 import { openEditorAndType } from '../../../helpers/editorHelpers';
 import { mentionContent, textContent } from '../../../helpers/content';
 import { blockContent } from '../../../helpers/headlessEditor';
+import { signInAs } from '../../../helpers/session';
 
 const mentionMenu = () => page.getByTestId('mention-menu');
 
@@ -31,6 +32,15 @@ describe('@ mention menu', () => {
       mentionContent('8', 'Peter Lang'),
       textContent(' there'),
     ]);
+  });
+
+  it('records the signed-in user as the one who mentioned', async () => {
+    signInAs(4);
+    const editor = await renderEditorWithHandle();
+    await openEditorAndType('Hi @pet');
+    await userEvent.click(mentionMenu().getByText('Peter Lang'));
+
+    await expect.poll(() => blockContent(editor)[1]).toEqual(mentionContent('8', 'Peter Lang', '4'));
   });
 
   it('picks with the keyboard', async () => {

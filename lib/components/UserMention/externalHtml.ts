@@ -4,20 +4,24 @@ import { USER_MENTION_TYPE } from '../../utils/nodeTypes';
 export interface UserMentionProps {
   userId:string;
   name:string;
+  /** Hocuspocus saves with the first connected user's token, so OpenProject reads who mentioned from here. */
+  mentionedBy?:string;
 }
 
 /** The exact markup OpenProject stores for a user mention (see Users::ReplaceMentionsService). */
-export function userMentionTag({ userId, name }:UserMentionProps):string {
+export function userMentionTag({ userId, name, mentionedBy }:UserMentionProps):string {
   const text = `@${name}`;
+  const mentionedByAttribute = mentionedBy ? ` data-mentioned-by="${escapeHtmlAttribute(mentionedBy)}"` : '';
   return `<mention class="mention" data-id="${escapeHtmlAttribute(userId)}" data-type="user" `
-    + `data-text="${escapeHtmlAttribute(text)}">${escapeHtmlText(text)}</mention>`;
+    + `data-text="${escapeHtmlAttribute(text)}"${mentionedByAttribute}>${escapeHtmlText(text)}</mention>`;
 }
 
-function wrapperAttributes({ userId, name }:UserMentionProps):Record<string, string> {
+function wrapperAttributes({ userId, name, mentionedBy }:UserMentionProps):Record<string, string> {
   return {
     'data-inline-content-type': USER_MENTION_TYPE,
     'data-user-id': userId,
     'data-name': name,
+    ...(mentionedBy ? { 'data-mentioned-by': mentionedBy } : {}),
   };
 }
 
@@ -31,11 +35,14 @@ export function buildUserMentionStoredDOM(props:UserMentionProps, document:Docum
 }
 
 export function parseUserMentionExternalHTML(element:HTMLElement):UserMentionProps | undefined {
+  const mentionedBy = element.getAttribute('data-mentioned-by') ?? '';
+
   // BlockNote's own wrapper omits the props at their default, so one without a user id is left to its content.
   if (element.getAttribute('data-inline-content-type') === USER_MENTION_TYPE && element.hasAttribute('data-user-id')) {
     return {
       userId: element.getAttribute('data-user-id') ?? '',
       name: element.getAttribute('data-name') ?? '',
+      mentionedBy,
     };
   }
 
@@ -44,6 +51,7 @@ export function parseUserMentionExternalHTML(element:HTMLElement):UserMentionPro
     return {
       userId,
       name: (element.getAttribute('data-text') ?? '').replace(/^@/, ''),
+      mentionedBy,
     };
   }
 
