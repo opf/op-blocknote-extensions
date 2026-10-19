@@ -1,6 +1,8 @@
-# NOTE: This plugin is now part of OpenProject Core 🥳
+# NOTE: This extension is now part of OpenProject Core 🥳
 
 As of [opf/openproject#25863](https://github.com/opf/openproject/pull/25863) this extension was merged into OpenProject core. Hence, further changes or improvements will be made directly within OpenProject.
+
+To check the current state of the README please look at [op-blocknote-extensions in OpenProject](https://github.com/opf/openproject/tree/dev/extensions/op-blocknote-extensions)
 
 Many thanks to everyone who worked on this extension - inside and outside of OpenProject's core development team! 💙
 
