@@ -1,3 +1,11 @@
+# NOTE: This plugin is now part of OpenProject Core 🥳
+
+As of [opf/openproject#25863](https://github.com/opf/openproject/pull/25863) this extension was merged into OpenProject core. Hence, further changes or improvements will be made directly within OpenProject.
+
+Many thanks to everyone who worked on this extension - inside and outside of OpenProject's core development team! 💙
+
+---
+
 # OpenProject BlockNote extensions
 
 [OpenProject](https://www.openproject.org/) extensions for the [BlockNote](https://www.blocknotejs.org/) editor.
