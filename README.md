@@ -1,3 +1,15 @@
+# NOTE: This extension moved to OpenProject Core 🥳
+
+As of [opf/openproject#25863](https://github.com/opf/openproject/pull/25863) this extension was merged into OpenProject core. Hence, further changes or improvements will be made directly within OpenProject.
+
+**Important**: the extension is still available in NPM [@openproject/op-blocknote-extensions](https://www.npmjs.com/package/@openproject/op-blocknote-extensions), and can be used by anyone who wants to integrate their BlockNote instance with OpenProject
+
+To check the current state of the README please look at [op-blocknote-extensions in OpenProject](https://github.com/opf/openproject/tree/dev/extensions/op-blocknote-extensions)
+
+Many thanks to everyone who worked on this extension - inside and outside of OpenProject's core development team! 💙
+
+---
+
 # OpenProject BlockNote extensions
 
 [OpenProject](https://www.openproject.org/) extensions for the [BlockNote](https://www.blocknotejs.org/) editor.
